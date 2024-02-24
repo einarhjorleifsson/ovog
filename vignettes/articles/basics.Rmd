@@ -1,0 +1,23 @@
+---
+title: "basics"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(hafvog)
+system.file("extdata", package = "hafvog") |> list.files()
+zip_path <- system.file("extdata", "TESTO-2024.zip", package = "hafvog")
+tmpdir <- tempdir()
+unzip(zipfile = zip_path, exdir = tmpdir)
+hv_cruise(tmpdir)
+hv_station(tmpdir) |> dplyr::glimpse()
+hv_towstations(tmpdir) |> dplyr::glimpse()
+hv_environment(tmpdir) |> dplyr::glimpse()
+hv_measures(tmpdir) |> dplyr::glimpse()
+```

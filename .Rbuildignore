@@ -1,0 +1,7 @@
+^hafvog\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^vignettes/articles$
+^LICENSE\.md$
+data-raw
+docs
