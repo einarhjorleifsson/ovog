@@ -8,6 +8,7 @@ v <-
                   "synaflokkur",   "sclass",
                   "veidafaeri",    "gid",
                   "skip",          "vid",
+                  "skip_nr",       "vid",
                   "leidangur",     "cruise",
                   
                   # hafvog stöð
@@ -15,7 +16,7 @@ v <-
                   "dags",             "date",
                   
                   "kastad_v_lengd",   "lon1",
-                  "kastad_n_breidd ", "lat1",
+                  "kastad_n_breidd",  "lat1",
                   "hift_v_lengd",     "lon2",
                   "hift_n_breidd",    "lat2",
                   
@@ -28,13 +29,20 @@ v <-
                   "fishing_gear_no", "gid",
                   
                   # hafvog tögstod
-                  "toghradi", "speed",
+                  "toghradi",  "speed",
                   "togstefna", "heading",
                   "toglengd",  "towlength",
                   "togbyrjun", "t1",
                   "togtimi",   "towtime",
                   "togendir",  "t2",
-                  "synis_id",  ".sid",
+                  "tognumer",  "tid",        # Think so
+                  "synis_id",  ".id",
+                  
+                  # hafvog umhverfi
+                  "botnhiti", "bt",
+                  "yfirbordshiti", "st",
+                  
+                  
                   
                   # hafvog skraning
                   "lengd", "length",

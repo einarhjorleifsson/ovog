@@ -4,12 +4,14 @@
 \alias{hv_station}
 \title{The station (stodvar) table}
 \usage{
-hv_station(pth, std = TRUE)
+hv_station(pth, std = TRUE, trim = TRUE)
 }
 \arguments{
 \item{pth}{A character string specifying the path to to the data}
 
 \item{std}{Boolean (default TRUE) specifying if names should be standardized}
+
+\item{trim}{Boolean (default TRUE) to limit number of variables returned}
 }
 \value{
 A tibble
