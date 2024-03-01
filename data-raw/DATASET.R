@@ -45,6 +45,7 @@ v <-
                   
                   
                   # hafvog skraning
+                  "maeliadgerd", "mtype",
                   "lengd", "length",
                   "tegund", "sid",
                   "tegund_as_faedutegund", "sid_food",
@@ -53,8 +54,11 @@ v <-
                   "magaastand", "stomach",
                   "kynthroski", "maturity",
                   "ranfiskurteg", "sid_pred",
-                  "heildarthyngd", "wt",
-                  "oslaegt", "gwt"
+                  "heildarthyngd", "twt",
+                  "oslaegt", "wt",
+                  "slaegt", "gwt",
+                  "lifur", "liver",
+                  "kynfaeri", "gonads"
                   )
 
 vocabulary <- stats::setNames(object = v$json, nm = v$std)

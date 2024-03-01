@@ -198,17 +198,36 @@ hv_environment <- function(pth, std = TRUE, trim = TRUE) {
 #'
 #' @param pth A character string specifying the path to to the data
 #' @param std Boolean (default TRUE) specifying if names should be standardized
-#'
+#' @param trim Boolean (default TRUE) to limit number of variables returned. Not active yet.
+#' 
 #' @return A tibble
 #' @export
-hv_measures <- function(pth, std = TRUE) {
+hv_measures <- function(pth, std = TRUE, trim = TRUE) {
   d <- 
     hv_tbl(pth, "skraning") |> 
-    dplyr::rename_all(~stringr::str_replace(.,"^s_",""))
+    dplyr::rename_all(~stringr::str_replace(.,"^s_","")) |> 
+    dplyr::select(synis_id,
+                  maeliadgerd,
+                  tegund,
+                  lengd,
+                  fjoldi,
+                  kyn,
+                  kynthroski,
+                  oslaegt,
+                  slaegt,
+                  magaastand,
+                  lifur,
+                  kynfaeri,
+                  kvarnanr,
+                  dplyr::everything())
+                 
   if(std) {
     d <- 
       d |> 
       dplyr::rename(dplyr::any_of(vocabulary))
+    if(trim) {
+      
+    }
   }
   
   return(d)
