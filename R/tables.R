@@ -62,7 +62,7 @@ hv_station0 <- function(pth, std = TRUE, trim = TRUE) {
       synis_id,
       synaflokkur,
       fishing_gear_no,
-      aths,
+      #aths,
       dplyr::everything()
     )
   
@@ -76,7 +76,7 @@ hv_station0 <- function(pth, std = TRUE, trim = TRUE) {
     if(trim) {
       d <-
         d |> 
-        dplyr::select(cruise:aths)
+        dplyr::select(cruise:gid)
     }
   }
   
