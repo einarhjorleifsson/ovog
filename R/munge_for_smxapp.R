@@ -1,4 +1,5 @@
 munge_for_smxapp_hafvog <- function(res, cruise, rda.file = "smb_dashboard.rda") {
+  
   # Magar ----------------------------------------------------------------------
   print("Byrjum a mogum")
   hv_pred <-

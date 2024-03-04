@@ -4,12 +4,14 @@
 \alias{hv_measures}
 \title{The measurement (skraning) table}
 \usage{
-hv_measures(pth, std = TRUE)
+hv_measures(pth, std = TRUE, trim = TRUE)
 }
 \arguments{
 \item{pth}{A character string specifying the path to to the data}
 
 \item{std}{Boolean (default TRUE) specifying if names should be standardized}
+
+\item{trim}{Boolean (default TRUE) to limit number of variables returned. Not active yet.}
 }
 \value{
 A tibble
