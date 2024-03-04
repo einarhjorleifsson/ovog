@@ -19,6 +19,7 @@ Imports:
     janitor,
     jsonlite,
     lubridate,
+    purrr,
     stringr,
     tibble,
     utils

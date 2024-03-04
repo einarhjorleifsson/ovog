@@ -1,0 +1,462 @@
+---
+title: "Mælaborð íslenzkra ralla"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+```{r seed}
+library(hafvog)
+library(tidyverse)
+```
+
+```{r, eval = FALSE}
+# * check ar/year
+# * check geoconvert, may be done twice
+```
+
+```{r, eval = FALSE}
+# CHECK: TESTING.R
+# USER INPUT -------------------------------------------------------------------
+AR <- 2024         # Current data year, used to limit historical data to years
+#  prior to this year
+SYNAFLOKKUR <- 30
+## location of your zip files:
+zip_files <- 
+  c("data-raw/A3-2024.zip", 
+    "data-raw/TB1-2024.zip")
+
+# Contemplate putting all stuff below in a single munge-function
+
+# USER CODE RUN ----------------------------------------------------------------
+
+## get the current data from the zip-files -------------------------------------
+current <- hv_read_zip_data(zip_files)
+## get the historical data from {mardata}-package ------------------------------
+historical <- hafvog:::hv_read_historical(AR = AR, SYNAFLOKKUR = SYNAFLOKKUR)
+## bind the current and historical data ----------------------------------------
+st <- dplyr::bind_rows(current$ST, historical$ST)
+nu <- dplyr::bind_rows(current$NU, historical$NU)
+le <- dplyr::bind_rows(current$LE, historical$LE)
+kv <- dplyr::bind_rows(current$KV, historical$KV)
+
+res <- list(st = st, 
+            nu = nu, 
+            le = le, 
+            kv = kv, 
+            skraning = current$M,
+            pred = current$pred,
+            prey = current$prey)
+res |> write_rds("data2/hafvog_dump.rds")
+```
+
+
+```{r smxapp}
+res <- readr::read_rds("data2/hafvog_dump.rds")
+iDONE <-
+  res$st |>
+  filter(ar == max(ar)) |> 
+  pull(index)
+species <- 
+  res$le |> 
+  dplyr::filter(index %in% iDONE) |> 
+  dplyr::select(tegund) |> 
+  dplyr::distinct() |> 
+  dplyr::arrange(tegund) |> 
+  dplyr::rename(sid = tegund) |> 
+  dplyr::left_join(hafvog::stodtoflur$species |> 
+                     dplyr::select(sid = species_no, tegund = name),
+                   by = dplyr::join_by(sid))
+
+
+my.species <- species$sid
+names(my.species) <- species$tegund
+
+my.cruises <-
+  res$st |> 
+  dplyr::filter(ar == 2024) |> 
+  dplyr::pull(leidangur) |> 
+  unique()
+```
+
+Sidebar {.sidebar data-width=175}
+=====================================
+
+```{r}
+selectInput(inputId = "Species", label = "Tegund:",
+            choices = my.species, selected = 1)
+
+
+radioButtons(inputId = "Type", label = "Val:", 
+             choices = list("Fjöldi", "Þyngd"),
+             selected = list("Fjöldi"))
+
+checkboxGroupInput(inputId = "Leidangur", label = "Leidangur:",
+                   choices = my.cruises, selected = my.cruises)
+```
+
+
+Síðast uppfært: 
+
+
+ATH: Val á leiðangri ekki virkt í öllum gluggum.
+
+Dót til prufu - um kóðann sem er á bak við má fræðast um nánar [hér](http://www.hafro.is/~einarhj/gagnakvorn).
+
+Forsíða
+=====================================  
+
+Column 
+-------------------------------------
+
+### Eftir lengd
+
+
+```{r}
+renderPlot({
+  lh <- function(d) {
+    expand_grid(ar = min(d$ar):max(d$ar),
+                #index = unique(d$index),
+                lengd = min(d$lengd):max(d$lengd)) |> 
+      left_join(d,
+                by = dplyr::join_by(ar, lengd)) |> 
+      mutate(n = replace_na(n, 0),
+             b = replace_na(b, 0))
+  }
+  d <- 
+    res$st |> 
+    filter(index %in% iDONE) |> 
+    select(ar, index) |> 
+    filter(ar >= 2009) |> 
+    inner_join(res$le |> 
+                 filter(tegund == input$Species),
+               by = dplyr::join_by(ar, index)) |> 
+    group_by(tegund, ar, lengd) |> 
+    summarise(n = sum(n),
+              b = sum(b),
+              .groups = "drop") |> 
+    lh() |> 
+    arrange(ar, lengd)
+  d.median <- 
+    d |> 
+    group_by(lengd) |> 
+    summarise(n = mean(n),
+              b = mean(b),
+              .groups = "drop")
+  
+  if(input$Type == "Fjöldi") 
+  {
+    ggplot() +
+      theme_bw() +
+      geom_ribbon(data = d.median,
+                  aes(lengd, ymax = n, ymin = 0), fill = "grey") +
+      geom_line(data = d,
+                aes(lengd, n)) +
+      facet_wrap(~ ar) +
+      scale_x_continuous(breaks = seq(0, 160, by = 20)) +
+      labs(x = NULL,
+           y = "Fjöldi í hverju lengdarbili")
+  } else {
+    ggplot() +
+      theme_bw() +
+      geom_ribbon(data = d.median,
+                  aes(lengd, ymax = b, ymin = 0), fill = "grey") +
+      geom_line(data = d,
+                aes(lengd, b)) +
+      facet_wrap(~ ar) +
+      scale_x_continuous(breaks = seq(0, 160, by = 20)) +
+      labs(x = NULL,
+           y = "Þyngd [kg] í hverju lengdarbili")
+  } 
+  
+})
+
+```
+
+
+Column 
+-------------------------------------
+
+### Meðalafli - hártogun með staðalvikmörkum
+
+
+```{r}
+renderPlot({
+  if(input$Type == "Fjöldi") 
+  {
+    
+  } else {
+    
+  }
+})
+```
+
+### Afli í staðaltogi árið ...
+
+```{r}
+leaflet::renderLeaflet({
+  
+  if(input$Type == "Fjöldi") {
+    
+  } else {
+    
+  }
+})
+
+```
+
+Dreifing
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Afli í staðaltogi
+
+```{r}
+renderPlot({
+  if(input$Type == "Fjöldi") {
+    
+  } else {
+    
+  }
+})
+
+```
+
+### Tegund - fjöldi í reit
+
+```{r}
+renderPlot({
+  
+})
+```
+
+### Tegund - fyrsta skipti í reit: kort
+
+```{r}
+renderPlot({
+  
+})
+```
+
+
+Vikmörk-myndir
+=====================================
+
+
+Column {.tabset}
+-------------------------------------
+
+### Lengd-óslægt
+
+```{r}
+renderPlot({
+  
+})
+```
+
+### Lengd-slægt
+
+```{r}
+renderPlot({
+  
+})
+
+```
+
+### Lengd-slægt/óslægt
+
+```{r}
+renderPlot({
+  
+})
+
+```
+
+### Lengd-lifur/óslaegt
+
+```{r}
+renderPlot({
+  
+})
+
+```
+
+### Lengd-kynkirtlar/óslaegt
+
+```{r}
+renderPlot({
+  
+})
+
+```
+
+Vikmörk-tafla
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Lengdir - allar tegundir
+
+```{r}
+DT::renderDataTable({
+  
+})
+
+```
+
+
+### Kvarnir - allar tegundir
+
+```{r}
+DT::renderDataTable({
+})
+```
+
+### Tegund - fyrsta skipti í reit
+
+```{r}
+DT::renderDataTable({
+  
+})
+```
+
+Magar
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Mælingar á bráð
+
+```{r}
+DT::renderDataTable({
+  
+})
+```
+
+### Þyngdardreifing á bráð - Topp 20 bráðir
+
+```{r}
+renderPlot({
+  # applly some filter
+  
+})
+```
+
+
+### Samantekt per fisk
+
+```{r}
+DT::renderDataTable({
+  
+})
+```
+
+### Dreifing á magafylli eftir tegundum
+
+```{r}
+renderPlot({
+  
+})
+```
+
+Togupplýsingar
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Lögun - síðustu 20 stöðvar
+
+```{r}
+renderPlot({
+  
+})
+```
+
+### Umhverfi - síðustu 20 stöðvar
+
+```{r}
+renderPlot({
+  
+})
+```
+
+### Tímatrend - lögun
+
+```{r}
+renderPlot({
+  
+  
+  
+})
+```
+
+### Tímatrend - umhverfi
+
+```{r}
+renderPlot({
+  
+  
+})
+```
+
+Surf and turf
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Togfar
+
+```{r}
+
+leaflet::renderLeaflet({
+  
+})
+
+```
+
+
+
+Af aflabrögðum
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Afli
+
+```{r}
+DT::renderDataTable({
+  
+})
+
+```
+
+### Mælingar 1
+
+```{r}
+
+
+```
+
+### Mælingar 2
+
+```{r}
+renderPlot({
+  
+  
+})
+```
+
+### Mælingar eftir tegundum
+
+```{r}
+renderPlot({
+  
+  
+})
+```
