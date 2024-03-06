@@ -2,7 +2,8 @@ tbl_js <- function(zpth, tbl) {
   conz <- unzip(zpth, tbl)
   d <-
     jsonlite::read_json(conz, simplifyVector = TRUE)$values |> 
-    janitor::clean_names()
+    janitor::clean_names() |> 
+    tibble::as_tibble()
   #unlink(conz)
   return(d)
 }

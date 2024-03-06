@@ -60,6 +60,8 @@ hv_read_zip_file <- function(zip_file) {
                   lat1 = kastad_n_breidd,
                   lon2 = hift_v_lengd,
                   lat2 = hift_n_breidd) |> 
+    dplyr::mutate(lon2 = ifelse(is.na(lon2), lon1, lon2),
+                  lat2 = ifelse(is.na(lat2), lat1, lat2)) |> 
     dplyr::mutate(lon = (lon1 + lon2) / 2,
                   lat = (lat1 + lat2) / 2,
                   toglengd = ifelse(is.na(toglengd), 4, toglengd),

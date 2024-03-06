@@ -9,27 +9,33 @@ nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMB) <- nome
 use_data(stadlar_SMB, overwrite = TRUE)
 
+
+
+
+
+
+
 zipfile <- "data-raw/stillingar_SMH_rall_(haust).zip"
 files <- unzip(zipfile, list = TRUE)
-stadlar_SMH <- map2(zipfile, files$Name, tbl_js)
+stadlar_SMH <- map2(zipfile, files$Name, hafvog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMH) <- nome
-use_data(stadlar_SMH)
+use_data(stadlar_SMH, overwrite = TRUE)
 
 zipfile <- "data-raw/stillingar_SMN_rall.zip"
 files <- unzip(zipfile, list = TRUE)
-stadlar_SMN <- map2(zipfile, files$Name, tbl_js)
+stadlar_SMN <- map2(zipfile, files$Name, hafvog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMN) <- nome
-use_data(stadlar_SMN)
+use_data(stadlar_SMN, overwrite = TRUE)
 
 # stodtoflur -------------------------------------------------------------------
 zipfile <- "data-raw/stodtoflur.zip"
 files <- unzip(zipfile, list = TRUE)
-stodtoflur <- map2(zipfile, files$Name, tbl_js)
+stodtoflur <- map2(zipfile, files$Name, hafvog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove("_v.txt") |> str_remove(".txt")
 names(stodtoflur) <- nome
-use_data(stodtoflur)
+use_data(stodtoflur, overwrite = TRUE)
 
 # older code below -------------------------------------------------------------
 if(FALSE) {

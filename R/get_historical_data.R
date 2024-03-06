@@ -65,8 +65,8 @@ hv_read_historical <- function(AR, SYNAFLOKKUR) {
                   lat1 = kastad_n_breidd,
                   lon2 = hift_v_lengd,
                   lat2 = hift_n_breidd) |>
-    #geo::geoconvert(col.names = c("lat1", "lon1")) |>
-    #geo::geoconvert(col.names = c("lat2", "lon2")) |>
+    dplyr::mutate(lon2 = ifelse(is.na(lon2), lon1, lon2),
+                  lat2 = ifelse(is.na(lat2), lat1, lat2)) |> 
     dplyr::mutate(lon = (lon1 + lon2) / 2,
                   lat = (lat1 + lat2) / 2,
                   toglengd = ifelse(is.na(toglengd), 4, toglengd))
@@ -75,8 +75,8 @@ hv_read_historical <- function(AR, SYNAFLOKKUR) {
     ST |> 
     dplyr::select(synis_id, ar, index) |> 
     dplyr::left_join(mardata::skala |>
-                        # strange to have na in tegund_nr
-                        dplyr::filter(!is.na(tegund_nr)),
+                       # strange to have na in tegund_nr
+                       dplyr::filter(!is.na(tegund_nr)),
                      by = dplyr::join_by(synis_id)) |>
     dplyr::select(ar, 
                   index,
@@ -90,7 +90,7 @@ hv_read_historical <- function(AR, SYNAFLOKKUR) {
     ST |> 
     dplyr::select(synis_id, ar, index) |> 
     dplyr::left_join(mardata::lengd,
-                      by = dplyr::join_by(synis_id)) |> 
+                     by = dplyr::join_by(synis_id)) |> 
     dplyr::group_by(ar, index, tegund = tegund_nr, lengd) |> 
     dplyr::summarise(fjoldi = sum(fjoldi, na.rm = TRUE),
                      .groups = "drop") |> 
@@ -104,7 +104,7 @@ hv_read_historical <- function(AR, SYNAFLOKKUR) {
     dplyr::filter(!(ar == 1986 & index == 5630273 & tegund == 19 & is.na(lengd))) 
   if(any(is.na(LE$r))) stop("Unexpected: Raising factor (r) in object LE is na")
   if(any(is.na(LE$lengd))) stop("Unexpected: Undefined lengd in object LE")
-         
+  
   KV <-
     ST |> 
     dplyr::select(synis_id, ar, index) |> 
