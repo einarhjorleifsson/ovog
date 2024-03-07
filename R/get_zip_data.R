@@ -24,6 +24,8 @@ hv_read_zip_data <- function(zip_file) {
 }
 
 
+
+
 #' Reads a sinle hafvog zip file
 #'
 #' @param zip_file File name, including path
@@ -33,9 +35,7 @@ hv_read_zip_data <- function(zip_file) {
 hv_read_zip_file <- function(zip_file) {
   
   
-  if(!file.exists(zip_file)) {
-    stop("There is no file: ", zip_file, ". Check your path and spelling")
-  }
+  
   
   tmpdir <- tempdir()
   if(file.exists(paste0(tmpdir, "/hafvog.leidangrar.txt"))) file.remove(paste0(tmpdir, "/hafvog.leidangrar.txt"))
@@ -56,7 +56,7 @@ hv_read_zip_file <- function(zip_file) {
                                         .default = veidarfaeri),
                   index = (reitur * 100 + tognumer) * 100 + vf) |>
     dplyr::select(-vf) |> 
-    dplyr::mutate(lon1 = kastad_v_lengd,
+    dplyr::rename(lon1 = kastad_v_lengd,
                   lat1 = kastad_n_breidd,
                   lon2 = hift_v_lengd,
                   lat2 = hift_n_breidd) |> 
@@ -71,7 +71,7 @@ hv_read_zip_file <- function(zip_file) {
   ## Measures ------------------------------------------------------------------
   M <- 
     ST |> 
-    dplyr::select(synis_id, ar, index) |> 
+    dplyr::select(synis_id, ar, leidangur, index, stod) |> 
     dplyr::left_join(hv_measures(tmpdir, std = FALSE),
                      by = dplyr::join_by(synis_id)) |>
     dplyr::select(-synis_id) |> 
@@ -79,7 +79,8 @@ hv_read_zip_file <- function(zip_file) {
     #   expect tagging to be in another synaflokkur than survey
     dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
                                        maeliadgerd %in% 10 ~ "talid",
-                                       .default = "annað"))
+                                       .default = "annað")) |> 
+    dplyr::arrange(leidangur, stod, tegund, maeliadgerd, nr)
   ## Numer -----------------------------------------------------------------------
   NU <- 
     ST |> 
@@ -143,7 +144,7 @@ hv_read_zip_file <- function(zip_file) {
   ## Prey (not really needed) --------------------------------------------------
   prey <-
     M |> 
-    dplyr::filter(maeliadgerd %in% c(20, 21)) |> 
+    dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
     dplyr::rename(prey = tegund,
                   pred = ranfiskurteg,
                   pnr = nr, 

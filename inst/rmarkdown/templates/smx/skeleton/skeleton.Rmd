@@ -5,13 +5,14 @@ runtime: shiny
 ---
 
 ```{r seed}
+library(tidyverse)
 library(hafvog)
 library(tidyverse)
 ```
 
 ```{r, eval = FALSE}
-# * check ar/year
-# * check geoconvert, may be done twice
+# The data root for each plot
+
 ```
 
 ```{r, eval = FALSE}
@@ -25,40 +26,26 @@ zip_files <-
   c("data-raw/A3-2024.zip", 
     "data-raw/TB1-2024.zip")
 
-# Contemplate putting all stuff below in a single munge-function
-
 # USER CODE RUN ----------------------------------------------------------------
 
 ## get the current data from the zip-files -------------------------------------
 current <- hv_read_zip_data(zip_files)
 ## get the historical data from {mardata}-package ------------------------------
-historical <- hafvog:::hv_read_historical(AR = AR, SYNAFLOKKUR = SYNAFLOKKUR)
-## bind the current and historical data ----------------------------------------
-st <- dplyr::bind_rows(current$ST, historical$ST)
-nu <- dplyr::bind_rows(current$NU, historical$NU)
-le <- dplyr::bind_rows(current$LE, historical$LE)
-kv <- dplyr::bind_rows(current$KV, historical$KV)
-
-res <- list(st = st, 
-            nu = nu, 
-            le = le, 
-            kv = kv, 
-            skraning = current$M,
-            pred = current$pred,
-            prey = current$prey)
-res |> write_rds("data2/hafvog_dump.rds")
-```
+historical <- hv_read_historical(AR = AR, SYNAFLOKKUR = SYNAFLOKKUR)
+res <- hv_bind_timeperiods(current, historical)
 
 
-```{r smxapp}
-res <- readr::read_rds("data2/hafvog_dump.rds")
-iDONE <-
-  res$st |>
-  filter(ar == max(ar)) |> 
-  pull(index)
+
+le.sum <- 
+  res$le |> 
+  group_by(ar, index, tegund) |> 
+  summarise(n = sum(n),
+            b = sum(b),
+            .groups = "drop")
+
+
 species <- 
   res$le |> 
-  dplyr::filter(index %in% iDONE) |> 
   dplyr::select(tegund) |> 
   dplyr::distinct() |> 
   dplyr::arrange(tegund) |> 
@@ -66,16 +53,39 @@ species <-
   dplyr::left_join(hafvog::stodtoflur$species |> 
                      dplyr::select(sid = species_no, tegund = name),
                    by = dplyr::join_by(sid))
-
-
 my.species <- species$sid
-names(my.species) <- species$tegund
+names(my.species) <- #species$tegund
+  paste0(species$sid, " ", species$tegund)
 
 my.cruises <-
   res$st |> 
   dplyr::filter(ar == 2024) |> 
   dplyr::pull(leidangur) |> 
   unique()
+
+res <- list(st = res$st, 
+            #nu = nu, 
+            le = res$le,
+            le.sum = le.sum,
+            kv = res$kv, 
+            skraning = current$M,
+            pred = current$pred,
+            prey = current$prey,
+            my.species = my.species,
+            my.cruises = my.cruises)
+res |> write_rds("data2/hafvog_dump.rds")
+```
+
+
+```{r smxapp}
+res <- readr::read_rds("data2/hafvog_dump.rds")
+
+choise_list <- list()
+for(i in 1:length(res$my.cruises)) {
+  choise_list[[i]] <- res$my.cruises[i]
+}
+names(choise_list) <- res$my.cruises
+
 ```
 
 Sidebar {.sidebar data-width=175}
@@ -83,7 +93,7 @@ Sidebar {.sidebar data-width=175}
 
 ```{r}
 selectInput(inputId = "Species", label = "Tegund:",
-            choices = my.species, selected = 1)
+            choices = res$my.species, selected = 1)
 
 
 radioButtons(inputId = "Type", label = "Val:", 
@@ -91,7 +101,7 @@ radioButtons(inputId = "Type", label = "Val:",
              selected = list("Fjöldi"))
 
 checkboxGroupInput(inputId = "Leidangur", label = "Leidangur:",
-                   choices = my.cruises, selected = my.cruises)
+                   choices = res$my.cruises, selected = choise_list)
 ```
 
 
@@ -124,7 +134,6 @@ renderPlot({
   }
   d <- 
     res$st |> 
-    filter(index %in% iDONE) |> 
     select(ar, index) |> 
     filter(ar >= 2009) |> 
     inner_join(res$le |> 
@@ -142,6 +151,10 @@ renderPlot({
     summarise(n = mean(n),
               b = mean(b),
               .groups = "drop")
+  yupper <-
+    d.median |> 
+    dplyr::summarise(n = max(n) * 1.75,
+                     b = max(b) * 1.75)
   
   if(input$Type == "Fjöldi") 
   {
@@ -151,10 +164,11 @@ renderPlot({
                   aes(lengd, ymax = n, ymin = 0), fill = "grey") +
       geom_line(data = d,
                 aes(lengd, n)) +
-      facet_wrap(~ ar) +
+      facet_wrap(~ ar, dir = "v") +
       scale_x_continuous(breaks = seq(0, 160, by = 20)) +
       labs(x = NULL,
-           y = "Fjöldi í hverju lengdarbili")
+           y = "Fjöldi í hverju lengdarbili") +
+      coord_cartesian(ylim = c(0, yupper$n))
   } else {
     ggplot() +
       theme_bw() +
@@ -162,14 +176,13 @@ renderPlot({
                   aes(lengd, ymax = b, ymin = 0), fill = "grey") +
       geom_line(data = d,
                 aes(lengd, b)) +
-      facet_wrap(~ ar) +
+      facet_wrap(~ ar, dir = "v") +
       scale_x_continuous(breaks = seq(0, 160, by = 20)) +
       labs(x = NULL,
-           y = "Þyngd [kg] í hverju lengdarbili")
+           y = "Þyngd [kg] í hverju lengdarbili")  +
+      coord_cartesian(ylim = c(0, yupper$b))
   } 
-  
 })
-
 ```
 
 
@@ -181,23 +194,78 @@ Column
 
 ```{r}
 renderPlot({
+  d <- 
+    res$st |> 
+    select(ar, index) |> 
+    left_join(res$le.sum |> 
+                filter(tegund == input$Species),
+              by = dplyr::join_by(ar, index)) |> 
+    mutate(n = replace_na(n, 0),
+           b = replace_na(b, 0))
+  
   if(input$Type == "Fjöldi") 
   {
-    
+    ggplot() +
+      theme_bw() +
+      stat_summary(data = d,
+                   aes(ar, n),
+                   fun.data = "mean_cl_boot") +
+      scale_x_continuous(breaks = seq(1985, 2030, by = 5)) +
+      labs(x = NULL, y = "Fjöldi í togi")
   } else {
-    
+    ggplot() +
+      theme_bw() +
+      stat_summary(data = d,
+                   aes(ar, b),
+                   fun.data = "mean_cl_boot") +
+      scale_x_continuous(breaks = seq(1985, 2030, by = 5)) +
+      labs(x = NULL, y = "Þyngd [kg] í togi")
   }
 })
 ```
 
-### Afli í staðaltogi árið ...
+### Afli í staðaltogi
 
 ```{r}
 leaflet::renderLeaflet({
+  st2 <- 
+    res$st |> 
+    filter(ar == max(ar)) |> 
+    select(ar, index, lon, lat) |> 
+    left_join(res$le.sum |> 
+                filter(tegund == input$Species),
+              by = join_by(ar, index)) |> 
+    mutate(n = replace_na(n, 0),
+           b = replace_na(b, 0))
   
   if(input$Type == "Fjöldi") {
-    
+    pos <- 
+      st2 |> 
+      filter(n > 0) |> 
+      dplyr::arrange(-n) |> 
+      mutate(n = floor(n))
+    skali <- sqrt(max(pos$n))
+    leaflet::leaflet(pos) |> 
+      leaflet::addTiles() |> 
+      leaflet::addCircles(data = st2, weight = 2, color = "white", fillOpacity = 1, opacity = 1) |> 
+      leaflet::addCircles(weight = 1,
+                          label = ~paste(n, "stykki"),
+                          radius = ~sqrt(n)/skali * 5e4,
+                          color = "red")
   } else {
+    pos <- 
+      st2 |> 
+      filter(n > 0) |> 
+      dplyr::arrange(-b) |> 
+      mutate(b = floor(b))
+    skali <- sqrt(max(pos$b))
+    leaflet::leaflet(pos) |> 
+      leaflet::addTiles() |> 
+      leaflet::addCircles(data = st2, weight = 2, color = "white", fillOpacity = 1, opacity = 1) |> 
+      leaflet::addCircles(weight = 1,
+                          label = ~paste(b, "kg"),
+                          radius = ~sqrt(b)/skali * 5e4,
+                          color = "red")
     
   }
 })
@@ -214,24 +282,51 @@ Column {.tabset}
 
 ```{r}
 renderPlot({
+  now.year <- max(res$st$ar)
   if(input$Type == "Fjöldi") {
-    
+    res$st |> 
+      dplyr::filter(ar %in% c(1985, 1990, 1995, 2000, seq(2005, 2015, by = 2), now.year-1, now.year)) |> 
+      dplyr::left_join(res$le.sum |> 
+                         filter(tegund == input$Species),
+                       by = join_by(ar, index)) |> 
+      dplyr::mutate(n = replace_na(n, 0),
+                    b = replace_na(b, 0)) |> 
+      ggplot2::ggplot() +
+      ggplot2::theme_bw(base_size = 16) +
+      ggplot2::geom_polygon(data = geo::island, ggplot2::aes(lon, lat), fill = "grey") +
+      ggplot2::geom_point(ggplot2::aes(lon, lat, size = n),
+                          alpha = 0.5, colour = "red") +
+      ggplot2::scale_size_area(max_size = 30) +
+      ggplot2::coord_quickmap() +
+      #ggplot2::theme(legend.position = c(0.5, 0.6)) +
+      ggplot2::labs(x = NULL, y = NULL, size = "Stykki") +
+      ggplot2::facet_wrap(~ ar, nrow = 3)
   } else {
+    res$st |> 
+      dplyr::filter(ar %in% c(1985, 1990, 1995, 2000, seq(2005, 2015, by = 2), now.year-1, now.year)) |> 
+      dplyr::left_join(res$le.sum |> 
+                         filter(tegund == input$Species),
+                       by = join_by(ar, index)) |> 
+      dplyr::mutate(n = replace_na(n, 0),
+                    b = replace_na(b, 0)) |> 
+      ggplot2::ggplot() +
+      ggplot2::theme_bw(base_size = 16) +
+      ggplot2::geom_polygon(data = geo::island, ggplot2::aes(lon, lat), fill = "grey") +
+      ggplot2::geom_point(ggplot2::aes(lon, lat, size = b),
+                          alpha = 0.5, colour = "red") +
+      ggplot2::scale_size_area(max_size = 30) +
+      ggplot2::coord_quickmap() +
+      #ggplot2::theme(legend.position = c(0.5, 0.6)) +
+      ggplot2::labs(x = NULL, y = NULL, size = "Kg") +
+      ggplot2::facet_wrap(~ ar, nrow = 3)
     
   }
 })
 
 ```
 
-### Tegund - fjöldi í reit
 
-```{r}
-renderPlot({
-  
-})
-```
-
-### Tegund - fyrsta skipti í reit: kort
+### Tegund - líkur á veiðí í reit
 
 ```{r}
 renderPlot({
@@ -322,6 +417,17 @@ DT::renderDataTable({
 })
 ```
 
+### Allar mælingar
+
+```{r}
+shiny::renderPrint({
+  res$skraning |> 
+    dplyr::select(index, tegund, lengd) |> 
+    as.data.frame()
+})
+```
+
+
 Magar
 =====================================
 
@@ -332,7 +438,11 @@ Column {.tabset}
 
 ```{r}
 DT::renderDataTable({
-  
+  res$prey |> 
+    #dplyr::filter(leidangur %in% input$Leidangur) %>% 
+    DT::datatable(extensions = 'Scroller',
+                  rownames = TRUE,
+                  options = list(lengthMenu = list(c(-1))))
 })
 ```
 
