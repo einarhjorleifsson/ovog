@@ -4,7 +4,7 @@
 \alias{hv_read_zip_data}
 \title{Reads muliple hafvogs files}
 \usage{
-hv_read_zip_data(zip_file)
+hv_read_zip_data(zip_file, smx = FALSE)
 }
 \arguments{
 \item{zip_file}{File name, including path}

@@ -2,9 +2,9 @@
 % Please edit documentation in R/get_zip_data.R
 \name{hv_read_zip_file}
 \alias{hv_read_zip_file}
-\title{Reads a sinle hafvog zip file}
+\title{Reads a single hafvog zip file}
 \usage{
-hv_read_zip_file(zip_file)
+hv_read_zip_file(zip_file, smx = FALSE)
 }
 \arguments{
 \item{zip_file}{File name, including path}
@@ -13,5 +13,5 @@ hv_read_zip_file(zip_file)
 a list
 }
 \description{
-Reads a sinle hafvog zip file
+Reads a single hafvog zip file
 }
