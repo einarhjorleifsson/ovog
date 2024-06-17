@@ -8,9 +8,9 @@
 #' @return a list
 #' @export
 #'
-hv_read_zip_data <- function(zip_file) {
+hv_read_zip_data <- function(zip_file,smx=FALSE) {
   
-  res <- purrr::map(zip_file, hv_read_zip_file)
+  res <- purrr::map(zip_file, hv_read_zip_file,smx=smx)
   names(res) <- basename(zip_file)
   
   return(list(ST = dplyr::bind_rows(sapply(res, "[", "ST")), 
@@ -26,13 +26,13 @@ hv_read_zip_data <- function(zip_file) {
 
 
 
-#' Reads a sinle hafvog zip file
+#' Reads a single hafvog zip file
 #'
 #' @param zip_file File name, including path
 #'
 #' @return a list
 #' @export
-hv_read_zip_file <- function(zip_file) {
+hv_read_zip_file <- function(zip_file,smx=FALSE) {
   
   
   
@@ -67,7 +67,9 @@ hv_read_zip_file <- function(zip_file) {
                   toglengd = ifelse(is.na(toglengd), 4, toglengd),
                   veidarfaeri = 73) |> 
     dplyr::mutate(ar = lubridate::year(dags))
-  if(any(is.na(ST$index))) stop("Unexpected: Tow index (index) is na")
+  if (!smx) ST |> dplyr::mutate(index=synis_id) -> ST
+  if(smx && any(is.na(ST$index)))
+    stop("Unexpected: Tow index (index) is na")
   ## Measures ------------------------------------------------------------------
   M <- 
     ST |> 
@@ -126,15 +128,16 @@ hv_read_zip_file <- function(zip_file) {
                        dplyr::filter(maeliadgerd == 3),
                      by = dplyr::join_by(ar, index)) |> 
     dplyr::select(ar, index, tegund, nr, lengd, kyn,
-                  kynthroski, oslaegt, slaegt,
-                  kynfaeri, lifur)
+                  kynthroski, oslaegt, #slaegt,
+                   #kynfaeri, 
+                  lifur, dplyr::everything())
   
   ## Predators (not really needed) ---------------------------------------------
   pred <- 
     M |> 
     dplyr::filter(!is.na(magaastand)) |> 
-    dplyr::select(ar, index, pred = tegund, nr, oslaegt, slaegt, 
-                  astand = magaastand) 
+    dplyr::select(ar, index, pred = tegund, nr, oslaegt, # slaegt, 
+                  astand = magaastand, dplyr::everything()) 
   # # Need the support table upstream
   # dplyr::left_join(magaastand |> 
   #                    dplyr::select(astand, lysing_astands),

@@ -214,10 +214,10 @@ hv_measures <- function(pth, std = TRUE, trim = TRUE) {
                   kyn,
                   kynthroski,
                   oslaegt,
-                  slaegt,
+#                  slaegt,
                   magaastand,
                   lifur,
-                  kynfaeri,
+#                  kynfaeri,
                   kvarnanr,
                   dplyr::everything())
                  
