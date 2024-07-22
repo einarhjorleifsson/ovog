@@ -4,12 +4,10 @@
 \alias{hv_tbl}
 \title{The base table function}
 \usage{
-hv_tbl(pth, tbl)
+hv_tbl(file)
 }
 \arguments{
-\item{pth}{A character string specifying the path to to the data}
-
-\item{tbl}{The actual table name}
+\item{file}{File name}
 }
 \value{
 A tibble

@@ -16,6 +16,7 @@ st_overlap <- function(surv_list) {
 #' Generates non-overlapping indices for a list of hafvog surveys
 #'
 #' @param surv_list List of Hafog data read infrom multiple survey zips
+#' @param jump_by A numerica
 #'
 #' @return list of sequential id-s one after the other for the multiple inputs
 #' @export

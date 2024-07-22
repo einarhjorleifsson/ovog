@@ -1,19 +1,19 @@
 #' Read historical data
 #'
-#' @param AR The current data year, year less than that will be returned
-#' @param SYNAFLOKKUR The survey sample class, normally either 30 or 35
+#' @param years Years of data to be returned
+#' @param sample_class The survey sample class, normally either 30 or 35
 #'
 #' @return a list
 #' @export
-hv_read_historical <- function(AR, SYNAFLOKKUR) {
+hv_read_historical <- function(years, sample_class) {
   
   # Main data from mar dump ----------------------------------------------------
   ST <-
     mardata::stod |>
-    dplyr::filter(ar < AR) |>
+    dplyr::filter(ar %in% years) |>
     dplyr::left_join(mardata::syni,
                      by = "stod_id") |>
-    dplyr::filter(synaflokkur_nr %in% SYNAFLOKKUR) |>
+    dplyr::filter(synaflokkur_nr %in% sample_class) |>
     dplyr::mutate(index = (reitur * 100 + tog_nr) * 100 + veidarfaeri) |>
     dplyr::select(synis_id,
                   leidangur,

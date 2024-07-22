@@ -90,4 +90,4 @@ check_and_re_index <- function(surv_list) {
 #' @export
 
 hv_concat <- function(surv_list) 
-  purrr::pmap(surv_list,bind_rows)
+  purrr::pmap(surv_list, dplyr::bind_rows)

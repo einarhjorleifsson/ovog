@@ -8,6 +8,8 @@ new_stations(surv_list, jump_by = 100)
 }
 \arguments{
 \item{surv_list}{List of Hafog data read infrom multiple survey zips}
+
+\item{jump_by}{A numerica}
 }
 \value{
 list of sequential id-s one after the other for the multiple inputs

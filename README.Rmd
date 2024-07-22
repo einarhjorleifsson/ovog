@@ -29,18 +29,12 @@ You can install the development version of hafvog from [GitHub](https://github.c
 devtools::install_github("einarhjorleifsson/hafvog")
 ```
 
-## Example
+## The fundamental stuff
 
-This is a basic example which shows you how to solve a common problem:
+With {hafvog} you can read in the content of the hafvog zip files via:
 
 ```{r example}
 library(hafvog)
-zip_path <- system.file("extdata", "TESTO-2024.zip", package = "hafvog")
-tmpdir <- tempdir()
-unzip(zipfile = zip_path, exdir = tmpdir)
-hv_cruise(tmpdir)
-hv_station(tmpdir) |> dplyr::glimpse()
-hv_towstations(tmpdir) |> dplyr::glimpse()
-hv_environment(tmpdir) |> dplyr::glimpse()
-hv_measures(tmpdir) |> dplyr::glimpse()
+zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
+hv_read_hafvog(zip_path, collapse_station = FALSE) |> dplyr::glimpse()
 ```

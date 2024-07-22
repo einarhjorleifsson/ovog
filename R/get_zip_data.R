@@ -49,7 +49,7 @@ hv_read_zip_file <- function(zip_file,smx=FALSE) {
   
   ## station -------------------------------------------------------------------
   ST <- 
-    hafvog::hv_station(tmpdir, std = FALSE) |> 
+    hv_station(tmpdir, std = FALSE) |> 
     dplyr::rename(veidarfaeri = fishing_gear_no) |> 
     # sometimes people forget to put in gear - should really generate a warning
     dplyr::mutate(vf = dplyr::case_when(synaflokkur == 30 & is.na(veidarfaeri) ~ 73,
@@ -81,7 +81,7 @@ hv_read_zip_file <- function(zip_file,smx=FALSE) {
     #   expect tagging to be in another synaflokkur than survey
     dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
                                        maeliadgerd %in% 10 ~ "talid",
-                                       .default = "annað")) |> 
+                                       .default = "annad")) |> 
     dplyr::arrange(leidangur, stod, tegund, maeliadgerd, nr)
   ## Numer -----------------------------------------------------------------------
   NU <- 
