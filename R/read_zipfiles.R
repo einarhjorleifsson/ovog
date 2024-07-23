@@ -30,9 +30,11 @@ hv_read_zipfile <- function(zipfile) {
   
 }
 
-#' Reads muliple hafvogs zipfiles
+#' Reads hafvog's zipfiles
 #'
-#' @param zip_file File name, including path
+#' Can read in multiple files. Name of source file is stored in variable ".id"
+#'
+#' @param zipfiles File names, including path
 #' @param collapse_station boolean (default TRUE), returns station, towstation and environment as a single table
 #'
 #' @return a list
@@ -80,69 +82,107 @@ hv_read_hafvog <- function(zipfiles, collapse_station = TRUE) {
 }
 
 hv_order_stodvar <- function(d) {
-  d |> 
-    dplyr::select(.file, 
-                  leidangur,
-                  #  Note, no station id
-                  skip,
-                  dags,
-                  reitur,
-                  smareitur,
-                  kastad_v_lengd,
-                  kastad_n_breidd,
-                  hift_v_lengd,
-                  hift_n_breidd,
-                  dypi_kastad,
-                  dypi_hift,
-                  stod,
-                  tog_aths,
-                  # sample variables
-                  synis_id,
-                  synaflokkur,
-                  fishing_gear_no,
-                  grandaralengd,
-                  dplyr::everything())
+  
+  tbl_colnames <- c(".file",
+                    "leidangur", "skip", "dags", "reitur", "smareitur", 
+                    "kastad_v_lengd", "kastad_n_breidd", "hift_v_lengd", "hift_n_breidd",
+                    "dypi_kastad", "dypi_hift", "stod", "tog_aths", "synis_id",
+                    "synaflokkur", "fishing_gear_no", "grandaralengd")
+  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "cciDiiiiiiddiciiid")
+  
+  d <- 
+    dplyr::bind_rows(dummy,
+                     d |> 
+                       dplyr::select(.file, 
+                                     leidangur,
+                                     #  Note, no station id
+                                     skip,
+                                     dags,
+                                     reitur,
+                                     smareitur,
+                                     kastad_v_lengd,
+                                     kastad_n_breidd,
+                                     hift_v_lengd,
+                                     hift_n_breidd,
+                                     dypi_kastad,
+                                     dypi_hift,
+                                     stod,
+                                     tog_aths,
+                                     # sample variables
+                                     synis_id,
+                                     synaflokkur,
+                                     fishing_gear_no,
+                                     grandaralengd,
+                                     dplyr::everything()))
+  return(d)
 }
 hv_order_togstodvar <- function(d) {
-  d |> 
-    dplyr::select(.file,
-                  synis_id,
-                  togbyrjun,
-                  togendir,
-                  togtimi,
-                  toghradi,
-                  toglengd,
-                  tognumer,
-                  togstefna,
-                  lodrett_opnun,
-                  larett_opnun,
-                  dplyr::everything())
+  
+  tbl_colnames <- c(".file",
+                    "synid_id", "togbyrjun", "togendir", "togtimi", "toghradi",
+                    "toglengd", "tognumer", "togstefna", "lodrett_opnun", "larett_opnun")
+  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "ciTTddddddd")
+  d <- 
+    dplyr::bind_rows(dummy,
+                     d |> 
+                       dplyr::select(.file,
+                                     synis_id,
+                                     togbyrjun,
+                                     togendir,
+                                     togtimi,
+                                     toghradi,
+                                     toglengd,
+                                     tognumer,
+                                     togstefna,
+                                     lodrett_opnun,
+                                     larett_opnun,
+                                     dplyr::everything()))
+  return(d)
 }
 hv_order_umhverfi <- function(d) {
-  d |> 
-    dplyr::select(.file,
-                  synis_id,
-                  yfirbordshiti,
-                  botnhiti,
-                  dplyr::everything())
+  
+  tbl_colnames <- c(".file",
+                    "synid_id", "yfirbordshiti", "botnhiti")
+  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "cidd")
+  d <- 
+    dplyr::bind_rows(dummy,
+                     d |> 
+                       dplyr::select(.file,
+                                     synis_id,
+                                     yfirbordshiti,
+                                     botnhiti,
+                                     dplyr::everything()))
+  return(d)
 }
 hv_order_skraning <- function(d) {
-  d |> 
-    dplyr::select(.file,
-                  s_synis_id,
-                  s_maeliadgerd,
-                  s_tegund,
-                  s_lengd,
-                  s_fjoldi,
-                  s_kyn,
-                  s_kynthroski,
-                  s_kvarnanr,
-                  s_nr,
-                  s_oslaegt,
-                  s_slaegt,
-                  s_magaastand,
-                  s_lifur,
-                  s_kynfaeri,
-                  s_tegund_as_faedutegund,
-                  dplyr::everything())
+  
+  tbl_colnames <- c(".file",
+                    "s_synid_id", "s_maeliadgerd", "s_tegund", "s_lengd",
+                    "s_fjoldi", "s_kyn", "s_kynthroski", "s_kvarnanr",
+                    "s_nr", "s_oslaegt", "s_slaegt", "s_magaastand",
+                    "s_lifur", "s_kynfaeri",
+                    "s_tegund_as_faedutegund")
+  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "ciiididdiidddddi")
+  d <-
+    dplyr::bind_rows(dummy, 
+                     d |> 
+                       dplyr::select(.file,
+                                     s_synis_id,
+                                     s_maeliadgerd,
+                                     s_tegund,
+                                     s_lengd,
+                                     s_fjoldi,
+                                     s_kyn,
+                                     s_kynthroski,
+                                     s_kvarnanr,
+                                     s_nr,
+                                     s_oslaegt,
+                                     s_slaegt,
+                                     s_magaastand,
+                                     s_lifur,
+                                     s_kynfaeri,
+                                     s_tegund_as_faedutegund,
+                                     dplyr::everything()))
+  return(d)
 }
+
