@@ -15,12 +15,16 @@ LazyData: true
 Config/Needs/website: rmarkdown
 Imports: 
     dplyr,
-    geo,
     janitor,
     jsonlite,
     lubridate,
     purrr,
+    readr,
+    rlang,
+    sf,
+    sp,
     stringr,
     tibble,
-    fs,
+    tidyr,
+    tidyselect,
     utils

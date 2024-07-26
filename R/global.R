@@ -1,3 +1,4 @@
+# This is just to declutter devtools::check()
 utils::globalVariables(
   c("dags", "dags_byrjun", "dags_endir", "dypi_hift", "dypi_kastad", "fishing_gear_no",
     "grandaralengd", "heildarafli", "hift_n_breidd", "hift_v_lengd", "kastad_n_breidd",
@@ -21,6 +22,14 @@ utils::globalVariables(
     "straumstefna", "synaflokkur_nr", "taldir", "talid", "tegund", "tegund_nr", "thyngd", "timi",
     "tog_nr", "togdypi_hift", "togdypi_kastad", "togdypishiti", "togstefna", "unzip", "value",
     "var", "variable", "vedur_nr", "veidarfaeri", "vid", "vindatt_nr", "vindhradi", "vir_uti",
-    "year"))
+    "year",
+    
+    "b", ".file", "s_synis_id", "s_maeliadgerd", "s_tegund", "s_lengd", "s_fjoldi", "s_kyn",
+    "s_kynthroski", "s_kvarnanr", "s_nr", "s_oslaegt", "s_slaegt", "s_magaastand", "s_lifur",
+    "s_kynfaeri", "s_tegund_as_faedutegund", "s_radnr", "s_ranfiskurteg", "s_heildarthyngd",
+    
+    "Name",
+    
+    "."))
 
 
