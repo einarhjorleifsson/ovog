@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 ## ...
 
 ```{r setup}
-library(mardata)
+library(hafvog)
 library(tidyverse)
 zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
 res <- hv_read_hafvog(zip_path) |> map(hv_std)

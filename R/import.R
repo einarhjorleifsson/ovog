@@ -8,6 +8,14 @@
 #'
 hv_read_zipfile <- function(zipfile) {
   
+  tmpdir <- tempdir()
+  if(file.exists(paste0(tmpdir, "/hafvog.leidangrar.txt"))) file.remove(paste0(tmpdir, "/hafvog.leidangrar.txt"))
+  if(file.exists(paste0(tmpdir, "/hafvog.skraning.txt"))) file.remove(paste0(tmpdir, "/hafvog.skraning.txt"))
+  if(file.exists(paste0(tmpdir, "/hafvog.stodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.stodvar.txt"))
+  if(file.exists(paste0(tmpdir, "/hafvog.togstodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.togstodvar.txt"))
+  if(file.exists(paste0(tmpdir, "/hafvog.umhverfi.txt"))) file.remove(paste0(tmpdir, "/hafvog.umhverfi.txt"))
+  if(file.exists(paste0(tmpdir, "/hafvog.skraning.txt"))) file.remove(paste0(tmpdir, "/hafvog.skraning.txt"))
+  
   files <- utils::unzip(zipfile = zipfile, list = TRUE) |> dplyr::pull(Name)
   utils::unzip(zipfile, exdir = tempdir(), overwrite = TRUE)
   res <- purrr::map(paste0(tempdir(), "/", files), hv_tbl)
@@ -163,11 +171,15 @@ hv_order_skraning <- function(d) {
                     "s_fjoldi", "s_kyn", "s_kynthroski", "s_kvarnanr",
                     "s_nr", "s_oslaegt", "s_slaegt", "s_magaastand",
                     "s_lifur", "s_kynfaeri",
-                    "s_tegund_as_faedutegund")
-  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "ciiididdiidddddi")
+                    "s_tegund_as_faedutegund",
+                    "s_radnr",
+                    "s_ranfiskurteg",
+                    "s_heildarthyngd")
+  dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "ciiididdiidddddiiid")
   d <-
     dplyr::bind_rows(dummy, 
                      d) |> 
+    # one could make this more simple by just dropping s_ from name
     dplyr::select(.file,
                   synis_id = s_synis_id,
                   maeliadgerd = s_maeliadgerd,
@@ -180,10 +192,13 @@ hv_order_skraning <- function(d) {
                   nr = s_nr,
                   oslaegt = s_oslaegt,
                   slaegt = s_slaegt,
-                  magastand = s_magaastand,
+                  magaastand = s_magaastand,
                   lifur = s_lifur,
                   kynfaeri = s_kynfaeri,
                   tegund_as_faedutegund = s_tegund_as_faedutegund,
+                  radnr = s_radnr,
+                  ranfiskurteg = s_ranfiskurteg, 
+                  heildarthyngd = s_heildarthyngd,
                   dplyr::everything())
   return(d)
 }
