@@ -26,7 +26,7 @@ You can install the development version of hafvog from [GitHub](https://github.c
 
 ```{r, eval = FALSE}
 # install.packages("devtools")
-remotes::install_github("einarhjorleifsson/hafvog/3-un-used-variable-names")
+remotes::install_github("einarhjorleifsson/hafvog@3-un-used-variable-names")
 ```
 
 ## The fundamental stuff
