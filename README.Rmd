@@ -36,7 +36,9 @@ With {hafvog} you can read in the content of the hafvog zip files via:
 ```{r example}
 library(hafvog)
 zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
-zip_path <- c(zip_path, "A7-2024.zip")
+tmpfile <- tempfile()
+download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
+zip_path <- c(zip_path, tmpfile)
 d <- hv_read_hafvog(zip_path, collapse_station = TRUE)
 
 names(d)

@@ -5,30 +5,62 @@ title: "Working with hafvog data"
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  message = FALSE,
+  warning = FALSE,
   comment = "#>"
 )
 ```
 
-## ...
+## Preamble
+
+The primary purpose of {hafvog} is to extract, import and reformat the json files that are stored in the zip-file generated when exporting data from the hafvog proper software.
+
+## Installing
+
+As of this the most recent working branch is associated with [Issue #3](https://github.com/einarhjorleifsson/hafvog/issues/3). To install it do:
+
+```{r, eval = FALSE}
+remotes::install_github("einarhjorleifsson/hafvog@3-un-used-variable-names")
+```
 
 ```{r setup}
 library(hafvog)
 library(tidyverse)
-zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
-res <- hv_read_hafvog(zip_path) |> map(hv_std)
 ```
 
-## Some tidying
+## Importing
+
+Importing is done via 'hv_read_hafvog':
 
 ```{r}
-res$stodvar |> 
-  hv_std() |> 
-  glimpse()
+tmpfile <- tempfile()
+download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
+res <- hv_read_hafvog(tmpfile)
 ```
 
-## Length view
+The imported object is a list that contains the following tibbles: leidangrar, stodvar, skraning and drasl_skraning. Besides the table stodvar the other key measuements table is skraning. The latter table may not be familiar to those that work from the main Oracle database, but in essence it contains all biological measurements from simple count to prey content of predators.
+
+## Some transformations
+
+One can get the more familiar "kvarnir", "lengdir" and "numer" format from the "skraning" table by passing the list object to the 'hv_create_tables'-function:
+
 
 ```{r}
+res <- 
+  res |> 
+  hv_create_tables()
+res |> names()
+```
 
+Now one could e.g. take a peek at the length distribution by the familiar:
+
+```{r}
+res$LE |> 
+  filter(tegund %in% c(209, 243, 136, 241, 164, 61, 11)) |> 
+  group_by(tegund, lengd) |> 
+  reframe(n = sum(n)) |> 
+  ggplot(aes(lengd, n)) +
+  geom_col(fill = "black", colour = "black") +
+  facet_wrap(~ tegund, scales = "free")
 ```
 
