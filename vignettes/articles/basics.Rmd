@@ -30,19 +30,33 @@ library(tidyverse)
 
 ## Importing
 
-Importing is done via 'hv_read_hafvog':
+Importing is done via 'hv_read_hafvog'. One normally would do something like this (replace the name with whatever zip-name you have on your computer):
+
+```{r, eval = FALSE}
+res <- hv_read_hafvog(zipfiles = "A7-2024.zip")
+```
+
+For the document in this document we will download a zip file from hafro ftp-site: 
 
 ```{r}
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
 res <- hv_read_hafvog(tmpfile)
+names(res)
 ```
 
 The imported object is a list that contains the following tibbles: leidangrar, stodvar, skraning and drasl_skraning. Besides the table stodvar the other key measuements table is skraning. The latter table may not be familiar to those that work from the main Oracle database, but in essence it contains all biological measurements from simple count to prey content of predators.
 
+We one can access any of the table in the list via:
+
+```{r}
+res$skraning |> glimpse()
+```
+
+
 ## Some transformations
 
-One can get the more familiar "kvarnir", "lengdir" and "numer" format from the "skraning" table by passing the list object to the 'hv_create_tables'-function:
+One can get the more familiar "kvarnir", "lengdir" and "numer" (talning) format from the "skraning" table by passing the list object to the 'hv_create_tables'-function:
 
 
 ```{r}
@@ -52,7 +66,22 @@ res <-
 res |> names()
 ```
 
-Now one could e.g. take a peek at the length distribution by the familiar:
+To access e.g. the "numer" file one does:
+
+```{r}
+res$NU |> glimpse()
+```
+
+One could e.g. plot the station location via:
+
+```{r}
+res$ST |> 
+  ggplot(aes(-kastad_v_lengd, kastad_n_breidd)) +
+  geom_point() +
+  coord_quickmap()
+```
+
+Or one could e.g. take a peek at the length distribution by the familiar:
 
 ```{r}
 res$LE |> 

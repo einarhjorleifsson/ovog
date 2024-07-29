@@ -4,7 +4,7 @@ Version: 2024.07.27
 Authors@R: c(
     person("Einar", "Hjörleifsson", , "einar.hjorleifsson@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0004-2160-5380")),
-    person("Sigurður", "Jónsson", , "sigurdur.thor.jonsson@gmail.com", role = "aut")
+    person("Sigurður Þór", "Jónsson", , "sigurdur.thor.jonsson@gmail.com", role = "aut")
   )
 Description: The intent of this package is basically to get rid of any dependance of Oracle when running the smx-app. This is achieved by reading the json-files that are generated as exchange/backup files of hafvog. Normally these filse are zip files.
 License: MIT + file LICENSE
