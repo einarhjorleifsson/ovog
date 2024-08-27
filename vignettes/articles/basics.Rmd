@@ -36,7 +36,7 @@ Importing is done via 'hv_read_hafvog'. One normally would do something like thi
 res <- hv_read_hafvog(zipfiles = "A7-2024.zip")
 ```
 
-For the document in this document we will download a zip file from hafro ftp-site: 
+For a demo we will download a zip file from hafro ftp-site: 
 
 ```{r}
 tmpfile <- tempfile()
@@ -66,7 +66,7 @@ res <-
 res |> names()
 ```
 
-To access e.g. the "numer" file one does:
+To access e.g. the "numer" table one does:
 
 ```{r}
 res$NU |> glimpse()
