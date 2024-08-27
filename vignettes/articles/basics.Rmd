@@ -17,10 +17,10 @@ The primary purpose of {hafvog} is to extract, import and reformat the json file
 
 ## Installing
 
-As of this the most recent working branch is associated with [Issue #3](https://github.com/einarhjorleifsson/hafvog/issues/3). To install it do:
+To install it do:
 
 ```{r, eval = FALSE}
-remotes::install_github("einarhjorleifsson/hafvog@3-un-used-variable-names")
+remotes::install_github("einarhjorleifsson/hafvog")
 ```
 
 ```{r setup}

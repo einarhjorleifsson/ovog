@@ -14,7 +14,8 @@ hv_read_historical <- function(years, sample_class) {
     dplyr::left_join(mardata::syni,
                      by = "stod_id") |>
     dplyr::filter(synaflokkur_nr %in% sample_class) |>
-    dplyr::mutate(index = (reitur * 100 + tog_nr) * 100 + veidarfaeri) |>
+    dplyr::mutate(index = case_when(!is.na(reitur) & !is.na(tog_nr) & !is.na(veidarfaeri) ~ (reitur * 100 + tog_nr) * 100 + veidarfaeri),
+                                    .default = -1) |> 
     dplyr::select(synis_id,
                   leidangur,
                   dags,
@@ -78,7 +79,8 @@ hv_read_historical <- function(years, sample_class) {
                        # strange to have na in tegund_nr
                        dplyr::filter(!is.na(tegund_nr)),
                      by = dplyr::join_by(synis_id)) |>
-    dplyr::select(ar, 
+    dplyr::select(synis_id,
+                  ar, 
                   index,
                   tegund = tegund_nr,
                   fj_maelt = maeldir,
@@ -91,17 +93,17 @@ hv_read_historical <- function(years, sample_class) {
     dplyr::select(synis_id, ar, index) |> 
     dplyr::left_join(mardata::lengd,
                      by = dplyr::join_by(synis_id)) |> 
-    dplyr::group_by(ar, index, tegund = tegund_nr, lengd) |> 
+    dplyr::group_by(synis_id, ar, index, tegund = tegund_nr, lengd) |> 
     dplyr::summarise(fjoldi = sum(fjoldi, na.rm = TRUE),
                      .groups = "drop") |> 
     dplyr::left_join(NU |> 
-                       dplyr::select(ar, index, tegund, r),
-                     by = dplyr::join_by(ar, index, tegund)) |> 
+                       dplyr::select(synis_id, ar, index, tegund, r),
+                     by = dplyr::join_by(synis_id, ar, index, tegund)) |> 
     dplyr::mutate(n = fjoldi * r,
                   b = (n * 0.01 * lengd^3) / 1e3) |> 
     # some odd measure
     dplyr::filter(!(ar == 1993 & index == 6660273 & tegund == 41 & is.na(r))) |> 
-    dplyr::filter(!(ar == 1986 & index == 5630273 & tegund == 19 & is.na(lengd))) 
+    dplyr::filter(!(ar == 1986 & index == 5630273 & tegund == 19 & is.na(lengd)))
   if(any(is.na(LE$r))) stop("Unexpected: Raising factor (r) in object LE is na")
   if(any(is.na(LE$lengd))) stop("Unexpected: Undefined lengd in object LE")
   
@@ -110,7 +112,8 @@ hv_read_historical <- function(years, sample_class) {
     dplyr::select(synis_id, ar, index) |> 
     dplyr::inner_join(mardata::aldur,
                       by = dplyr::join_by(synis_id)) |> 
-    dplyr::select(ar,
+    dplyr::select(synis_id,
+                  ar,
                   index,
                   tegund = tegund_nr,
                   nr = kvarna_nr,
