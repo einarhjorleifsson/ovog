@@ -24,9 +24,9 @@ The goal of hafvog is to read in the hafvogs json files into R
 
 You can install the development version of hafvog from [GitHub](https://github.com/) with:
 
-``` r
+```{r, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("einarhjorleifsson/hafvog")
+remotes::install_github("einarhjorleifsson/hafvog@3-un-used-variable-names")
 ```
 
 ## The fundamental stuff
@@ -36,5 +36,18 @@ With {hafvog} you can read in the content of the hafvog zip files via:
 ```{r example}
 library(hafvog)
 zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
-hv_read_hafvog(zip_path, collapse_station = FALSE) |> dplyr::glimpse()
+tmpfile <- tempfile()
+download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
+zip_path <- c(zip_path, tmpfile)
+d <- hv_read_hafvog(zip_path, collapse_station = TRUE)
+
+names(d)
+
+d$stodvar |> 
+  dplyr::left_join(d$skraning) |> 
+  dplyr::glimpse()
+
+d |> 
+  hv_create_tables() |> 
+  names()
 ```
