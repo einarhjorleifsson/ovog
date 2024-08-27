@@ -15,7 +15,7 @@ You can install the development version of hafvog from
 
 ``` r
 # install.packages("devtools")
-remotes::install_github("einarhjorleifsson/hafvog@3-un-used-variable-names")
+remotes::install_github("einarhjorleifsson/hafvog")
 ```
 
 ## The fundamental stuff
