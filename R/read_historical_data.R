@@ -14,7 +14,7 @@ hv_read_historical <- function(years, sample_class) {
     dplyr::left_join(mardata::syni,
                      by = "stod_id") |>
     dplyr::filter(synaflokkur_nr %in% sample_class) |>
-    dplyr::mutate(index = case_when(!is.na(reitur) & !is.na(tog_nr) & !is.na(veidarfaeri) ~ (reitur * 100 + tog_nr) * 100 + veidarfaeri),
+    dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tog_nr) & !is.na(veidarfaeri) ~ (reitur * 100 + tog_nr) * 100 + veidarfaeri),
                                     .default = -1) |> 
     dplyr::select(synis_id,
                   leidangur,

@@ -1,10 +1,7 @@
-^hafvog\.Rproj$
+^ovog\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^vignettes/articles$
 ^LICENSE\.md$
-data-raw
 docs
-garbage
-A7-2024.zip
-README.R
+data-raw

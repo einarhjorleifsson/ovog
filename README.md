@@ -1,30 +1,31 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# hafvog
+# ovog
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of hafvog is to read in the hafvogs json files into R
+The goal of {ovog} is to read in the hafvog’s json files that are inside
+the hafvog zip-dump into R.
 
 ## Installation
 
-You can install the development version of hafvog from
+You can install the development version of ovog from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-remotes::install_github("einarhjorleifsson/hafvog")
+remotes::install_github("einarhjorleifsson/ovog")
 ```
 
 ## The fundamental stuff
 
-With {hafvog} you can read in the content of the hafvog zip files via:
+With {ovog} you can read in the content of the hafvog zip files via:
 
 ``` r
-library(hafvog)
-zip_path <- system.file("zips", "A3-2024.zip", package = "hafvog")
+library(ovog)
+zip_path <- system.file("zips", "A3-2024.zip", package = "ovog")
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
 zip_path <- c(zip_path, tmpfile)
@@ -110,5 +111,5 @@ d$stodvar |>
 d |> 
   hv_create_tables() |> 
   names()
-#> [1] "ST"   "M"    "NU"   "LE"   "KV"   "pred" "prey"
+#> [1] "ST"   "M"    "NU"   "LE"   "KV"   "pred" "prey" "pp"
 ```

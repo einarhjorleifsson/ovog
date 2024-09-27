@@ -15,6 +15,6 @@ vocabulary
 }
 \description{
 A vector containing variable names as delivered in the json-files and
-the corresponding names used in {hafvog} if argument std is set to TRUE
+the corresponding names used in {ovog} if argument std is set to TRUE
 }
 \keyword{datasets}

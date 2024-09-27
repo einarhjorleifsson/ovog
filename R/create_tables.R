@@ -18,7 +18,7 @@ hv_create_tables <- function(list) {
     dplyr::mutate(fishing_gear_no = ifelse(is.na(fishing_gear_no), 73, fishing_gear_no)) |> 
     dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tognumer) & !is.na(fishing_gear_no) ~ (reitur * 100 + tognumer) * 100 + fishing_gear_no,
                                            .default = -1),
-                  ar = year(dags))
+                  ar = lubridate::year(dags))
   ## Measures ------------------------------------------------------------------
   M <- 
     list$skraning |> 
@@ -28,7 +28,7 @@ hv_create_tables <- function(list) {
                                        maeliadgerd %in% 10 ~ "talid",
                                        .default = "annad")) |> 
     dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = join_by(synis_id, .file))
+                     by = dplyr::join_by(synis_id, .file))
   ## Numer -----------------------------------------------------------------------
   NU <- 
     M |> 
@@ -43,7 +43,7 @@ hv_create_tables <- function(list) {
     dplyr::mutate(r = dplyr::case_when(fj_maelt == 0 ~ 1,
                                        .default = fj_alls / fj_maelt)) |> 
     dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = join_by(synis_id, .file)) |> 
+                     by = dplyr::join_by(synis_id, .file)) |> 
     dplyr::select(synis_id, ar, index, tegund, fj_maelt, fj_talid, fj_alls, r, .file)
   
   
@@ -61,7 +61,7 @@ hv_create_tables <- function(list) {
     dplyr::mutate(n = r * fjoldi,
                   b = (n * 0.01 * lengd^3) / 1e3) |> 
     dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = join_by(synis_id, .file)) |> 
+                     by = dplyr::join_by(synis_id, .file)) |> 
     dplyr::select(synis_id, ar, index, tegund, lengd, fjoldi, r, n, b)
   
   if(any(is.na(LE$r))) stop("Unexpected: Raising factor (r) is na")
@@ -73,9 +73,9 @@ hv_create_tables <- function(list) {
     dplyr::select(.file, synis_id, tegund, nr, lengd, kyn,
                   kynthroski, oslaegt, 
                   lifur, dplyr::everything()) |> 
-    select(-c(ar, index)) |> 
+    dplyr::select(-c(ar, index)) |> 
     dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = join_by(synis_id, .file)) |> 
+                     by = dplyr::join_by(synis_id, .file)) |> 
     dplyr::select(synis_id, ar, index, tegund, nr, lengd, dplyr::everything())
   
   ## Predators (not really needed) ---------------------------------------------
@@ -102,11 +102,11 @@ hv_create_tables <- function(list) {
                   n = fjoldi, lengd, kyn, thyngd = heildarthyngd)
   
   pp <- 
-    pred %>%
-    dplyr::left_join(prey, by = c("synis_id", "pred", "nr")) %>%
-    dplyr::left_join(ST %>%
+    pred |> 
+    dplyr::left_join(prey, by = c("synis_id", "pred", "nr"))  |> 
+    dplyr::left_join(ST |>
                        dplyr::select(synis_id, leidangur, stod),
-                     by = "synis_id") %>%
+                     by = "synis_id") |>
     dplyr::select(leidangur, stod, pred:thyngd)
   
   return(list(ST = ST, M = M, NU = NU, LE = LE, KV = KV, pred = pred, prey = prey, pp = pp))

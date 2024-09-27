@@ -4,7 +4,7 @@ library(devtools)
 library(tidyverse)
 zipfile <- "data-raw/stillingar_SMB_rall_(botnfiskur).zip"
 files <- unzip(zipfile, list = TRUE)
-stadlar_SMB <- map2(zipfile, files$Name, hafvog:::tbl_js)
+stadlar_SMB <- map2(zipfile, files$Name, ovog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMB) <- nome
 use_data(stadlar_SMB, overwrite = TRUE)
@@ -17,14 +17,14 @@ use_data(stadlar_SMB, overwrite = TRUE)
 
 zipfile <- "data-raw/stillingar_SMH_rall_(haust).zip"
 files <- unzip(zipfile, list = TRUE)
-stadlar_SMH <- map2(zipfile, files$Name, hafvog:::tbl_js)
+stadlar_SMH <- map2(zipfile, files$Name, ovog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMH) <- nome
 use_data(stadlar_SMH, overwrite = TRUE)
 
 zipfile <- "data-raw/stillingar_SMN_rall.zip"
 files <- unzip(zipfile, list = TRUE)
-stadlar_SMN <- map2(zipfile, files$Name, hafvog:::tbl_js)
+stadlar_SMN <- map2(zipfile, files$Name, ovog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove(".txt")
 names(stadlar_SMN) <- nome
 use_data(stadlar_SMN, overwrite = TRUE)
@@ -32,7 +32,7 @@ use_data(stadlar_SMN, overwrite = TRUE)
 # stodtoflur -------------------------------------------------------------------
 zipfile <- "data-raw/stodtoflur.zip"
 files <- unzip(zipfile, list = TRUE)
-stodtoflur <- map2(zipfile, files$Name, hafvog:::tbl_js)
+stodtoflur <- map2(zipfile, files$Name, ovog:::tbl_js)
 nome <- files$Name |>  str_remove("hafvog.") |> str_remove("_v.txt") |> str_remove(".txt")
 names(stodtoflur) <- nome
 use_data(stodtoflur, overwrite = TRUE)
@@ -46,7 +46,7 @@ if(FALSE) {
   ### json ----
   # NOTE: Only for SMB
   stadlar.rallstodvar <-
-    hafvog:::js_stadla_rallstodvar() |>
+    ovog:::js_stadla_rallstodvar() |>
     dplyr::filter(synaflokkur %in% id) |>
     dplyr::collect(n = Inf) |>
     # 2023-09-30 Quick fix
@@ -62,7 +62,7 @@ if(FALSE) {
   ## tegundir ----
   ### json ---
   stadlar.tegundir <-
-    hafvog:::js_stadla_tegund_smb() |>
+    ovog:::js_stadla_tegund_smb() |>
     dplyr::filter(leidangur_id == lid) |>
     dplyr::arrange(tegund) |>
     tidyr::gather(variable, value, lifur_low:kynkirtlar_high) |>
@@ -73,7 +73,7 @@ if(FALSE) {
   ### xe ----
   ### json ----
   stadlar.lw <-
-    hafvog:::js_stadla_lw() |>
+    ovog:::js_stadla_lw() |>
     dplyr::collect(n = Inf) |>
     dplyr::mutate(osl1 = osl * (1 - fravik),
                   osl2 = osl * (1 + fravik),
@@ -84,15 +84,15 @@ if(FALSE) {
   ## fishtegundir ----
   ### json ----
   fisktegundir <-
-    hafvog:::js_fisktegundir() |> 
+    ovog:::js_fisktegundir() |> 
     dplyr::select(tegund = species_no, heiti = name) |>
     dplyr::arrange(tegund)
   sid <-
-    hafvog:::js_fisktegundir() |> 
+    ovog:::js_fisktegundir() |> 
     dplyr::select(sid = species_no, tegund = name) |>
     dplyr::arrange(tegund)
   prey_names <-
-    hafvog:::js_fisktegundir() |> 
+    ovog:::js_fisktegundir() |> 
     dplyr::select(faeduhopur = food_no, lat_heiti = sci_name,
                   isl_heiti = name,
                   tegund = species_no)
@@ -100,7 +100,7 @@ if(FALSE) {
   ## Maeliatridi ----
   ### json ----
   aid <-
-    hafvog:::js_maeliatridi() |> 
+    ovog:::js_maeliatridi() |> 
     dplyr::rename(aid = id, adgerd = heiti)
   
   
@@ -108,5 +108,5 @@ if(FALSE) {
   # Predator ----
   ## json ----
   magaastand <- 
-    hafvog:::js_magaastand()
+    ovog:::js_magaastand()
 }
