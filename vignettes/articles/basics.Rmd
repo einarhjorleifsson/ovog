@@ -20,11 +20,11 @@ The primary purpose of {hafvog} is to extract, import and reformat the json file
 To install it do:
 
 ```{r, eval = FALSE}
-remotes::install_github("einarhjorleifsson/hafvog")
+remotes::install_github("einarhjorleifsson/ovog")
 ```
 
 ```{r setup}
-library(hafvog)
+library(ovog)
 library(tidyverse)
 ```
 
@@ -33,7 +33,7 @@ library(tidyverse)
 Importing is done via 'hv_read_hafvog'. One normally would do something like this (replace the name with whatever zip-name you have on your computer):
 
 ```{r, eval = FALSE}
-res <- hv_read_hafvog(zipfiles = "A7-2024.zip")
+res <- hv_read_zips(zipfiles = "A7-2024.zip")
 ```
 
 For a demo we will download a zip file from hafro ftp-site: 
@@ -41,7 +41,7 @@ For a demo we will download a zip file from hafro ftp-site:
 ```{r}
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
-res <- hv_read_hafvog(tmpfile)
+res <- hv_read_zips(tmpfile)
 names(res)
 ```
 

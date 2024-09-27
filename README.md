@@ -29,7 +29,7 @@ zip_path <- system.file("zips", "A3-2024.zip", package = "ovog")
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
 zip_path <- c(zip_path, tmpfile)
-d <- hv_read_hafvog(zip_path, collapse_station = TRUE)
+d <- hv_read_zips(zip_path, collapse_station = TRUE)
 
 names(d)
 #> [1] "stodvar"        "skraning"       "leidangrar"     "drasl_skraning"
