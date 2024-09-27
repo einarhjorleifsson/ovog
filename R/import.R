@@ -30,7 +30,6 @@ hv_read_zipfile <- function(zipfile) {
   if(file.exists(paste0(tmpdir, "/hafvog.stodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.stodvar.txt"))
   if(file.exists(paste0(tmpdir, "/hafvog.togstodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.togstodvar.txt"))
   if(file.exists(paste0(tmpdir, "/hafvog.umhverfi.txt"))) file.remove(paste0(tmpdir, "/hafvog.umhverfi.txt"))
-  if(file.exists(paste0(tmpdir, "/hafvog.skraning.txt"))) file.remove(paste0(tmpdir, "/hafvog.skraning.txt"))
   
   files <- utils::unzip(zipfile = zipfile, list = TRUE) |> dplyr::pull(Name)
   utils::unzip(zipfile, exdir = tempdir(), overwrite = TRUE)
@@ -47,10 +46,7 @@ hv_read_zipfile <- function(zipfile) {
     hv_geoconvert(hift_v_lengd) |> 
     hv_geoconvert(kastad_n_breidd) |> 
     hv_geoconvert(hift_n_breidd)
-    #dplyr::mutate(kastad_v_lengd = -.geoconvert(kastad_v_lengd),
-    #              kastad_n_breidd = .geoconvert(kastad_n_breidd),
-    #              hift_v_lengd = -.geoconvert(hift_v_lengd),
-    #              hift_n_breidd = .geoconvert(hift_n_breidd))
+
   res$togstodvar <-
     res$togstodvar |> 
     # mutate only if column exist
@@ -71,7 +67,7 @@ hv_read_zipfile <- function(zipfile) {
 #' @return a list
 #' @export
 #'
-hv_read_hafvog <- function(zipfiles, collapse_station = TRUE) {
+hv_read_zips <- function(zipfiles, collapse_station = TRUE) {
   
   res <- purrr::map(zipfiles, hv_read_zipfile)
   names(res) <- basename(zipfiles)

@@ -1,6 +1,7 @@
 devtools::check()
 devtools::build_readme()
 pkgdown::build_site()
-system("rm -rf  /net/hafri.hafro.is/export/home/hafri/einarhj/public_html/pgk/ovog/*")
+# system("mkdir /net/hafri.hafro.is/export/home/hafri/einarhj/public_html/pkg/ovog")
+system("rm -rf  /net/hafri.hafro.is/export/home/hafri/einarhj/public_html/pkg/ovog/*")
 system("cp -r docs/* /net/hafri.hafro.is/export/home/hafri/einarhj/public_html/pkg/ovog/.")
 system("chmod -R a+rX /net/hafri.hafro.is/export/home/hafri/einarhj/public_html/pkg/ovog")
