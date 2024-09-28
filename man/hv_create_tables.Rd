@@ -4,10 +4,13 @@
 \alias{hv_create_tables}
 \title{Create tables from hafvog "skraning"}
 \usage{
-hv_create_tables(list)
+hv_create_tables(list, scale = TRUE)
 }
 \arguments{
 \item{list}{A list object containing hafvog dataframes}
+
+\item{scale}{A boolean (default TRUE) will raise number of length measured
+with that counted}
 }
 \value{
 a list

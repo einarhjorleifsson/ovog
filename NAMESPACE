@@ -2,7 +2,6 @@
 
 export(hv_bind_timeperiods)
 export(hv_create_tables)
-export(hv_read_historical)
 export(hv_read_zipfile)
 export(hv_read_zips)
 export(hv_std)

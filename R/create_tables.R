@@ -4,11 +4,13 @@
 #' The outputs are tables like fiskar.lengdir, fiskar.kvarnir, fiskar.numer, ...
 #' 
 #' @param list A list object containing hafvog dataframes
+#' @param scale A boolean (default TRUE) will raise number of length measured
+#' with that counted
 #' 
 #' @return a list
 #' @export
 #' 
-hv_create_tables <- function(list) {
+hv_create_tables <- function(list, scale = TRUE) {
   
   
   ## station -------------------------------------------------------------------
@@ -52,19 +54,22 @@ hv_create_tables <- function(list) {
     M |> 
     dplyr::filter(m %in% "maelt") |> 
     dplyr::group_by(.file, synis_id, tegund, lengd) |> 
-    dplyr::summarise(fjoldi = sum(fjoldi, na.rm = TRUE),
-                     .groups = "drop") |> 
-    # skala með toldum
-    dplyr::left_join(NU |> 
+    dplyr::reframe(n = sum(fjoldi, na.rm = TRUE)) |> 
+    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
+                     by = dplyr::join_by(synis_id, .file))
+  if(scale) {
+    LE <- 
+      LE |> 
+      dplyr::left_join(NU |> 
                        dplyr::select(.file, synis_id, tegund, r),
                      by = dplyr::join_by(.file, synis_id, tegund)) |> 
-    dplyr::mutate(n = r * fjoldi,
-                  b = (n * 0.01 * lengd^3) / 1e3) |> 
-    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = dplyr::join_by(synis_id, .file)) |> 
-    dplyr::select(synis_id, ar, index, tegund, lengd, fjoldi, r, n, b)
+    dplyr::mutate(n = r * n,
+                  b = (n * 0.01 * lengd^3) / 1e3)  # biomass in kg
+  }
   
-  if(any(is.na(LE$r))) stop("Unexpected: Raising factor (r) is na")
+  LE <- 
+    LE |> 
+    dplyr::select(.file, synis_id, ar, index, tegund, lengd, n, b)
   
   ## Kvarnir ---------------------------------------------------------------------
   KV <- 
