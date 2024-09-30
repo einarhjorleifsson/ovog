@@ -4,9 +4,7 @@
 \alias{js_stadla_rallstodvar}
 \title{Title}
 \usage{
-js_stadla_rallstodvar(
-  con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip"
-)
+js_stadla_rallstodvar(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip")
 }
 \arguments{
 \item{con}{path to stillingar_SMB_rall}

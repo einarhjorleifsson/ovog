@@ -22,7 +22,7 @@ tbl_js <- function(zpth, tbl) {
 #'
 #' @export
 #'
-js_stadla_rallstodvar <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip") {
+js_stadla_rallstodvar <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   
   tbl_js(con, "hafvog.sti_rallstodvar.txt") |>
     dplyr::left_join(tbl_js(con, "hafvog.sti_leidangrar.txt"), by = "leidangur_id") |>
@@ -40,7 +40,7 @@ js_stadla_rallstodvar <- function(con = "inst/extdata/stillingar_SMB_rall_(botnf
 #'
 #' @export
 #'
-js_stadla_tegund_smb <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip") {
+js_stadla_tegund <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   
   tbl_js(con, "hafvog.fiskteg_tegundir.txt") |>
     dplyr::rename(tegund = fisktegund_id)
@@ -55,7 +55,7 @@ js_stadla_tegund_smb <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfi
 #'
 #' @export
 #'
-js_stadla_lw <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip") {
+js_stadla_lw <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   
   d <-
     tbl_js(con, "hafvog.fiskteg_lengd_thyngd.txt") |>
@@ -84,16 +84,16 @@ js_stadla_lw <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zi
 }
 
 
-js_fisktegundir <- function(con = "inst/extdata/stodtoflur.zip") {
+js_fisktegundir <- function(con = "data-raw/stodtoflur.zip") {
   tbl_js(con, "hafvog.species_v.txt")
 }
 
 
-js_maeliatridi <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip") {
+js_maeliatridi <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   tbl_js(con, "hafvog.maeliatridi.txt")
 }
 
 
-js_magaastand <- function(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip") {
+js_magaastand <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   tbl_js(con, "hafvog.magaastand.txt")
 }

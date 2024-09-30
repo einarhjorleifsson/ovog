@@ -24,6 +24,7 @@ remotes::install_github("einarhjorleifsson/ovog")
 ```
 
 ```{r setup}
+library(tidyverse)
 library(ovog)
 library(tidyverse)
 ```

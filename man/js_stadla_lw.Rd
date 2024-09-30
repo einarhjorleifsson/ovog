@@ -4,7 +4,7 @@
 \alias{js_stadla_lw}
 \title{Title}
 \usage{
-js_stadla_lw(con = "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip")
+js_stadla_lw(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip")
 }
 \arguments{
 \item{con}{XX}
