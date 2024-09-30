@@ -1,5 +1,5 @@
 tbl_js <- function(zpth, tbl) {
-  conz <- unzip(zpth, tbl)
+  conz <- unzip(zpth, tbl, exdir = tempdir())
   d <-
     jsonlite::read_json(conz, simplifyVector = TRUE)$values |> 
     janitor::clean_names() |> 
