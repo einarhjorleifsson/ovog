@@ -1,73 +1,87 @@
-#' The base table function
+#' Read and parse a json file
 #'
 #' @param file File name
 #'
 #' @return A tibble
-#' @export
-hv_tbl <- function(file) {
-  j <- jsonlite::read_json(file, simplifyVector = TRUE)
-  v <- 
-    j$v |> 
-    janitor::clean_names() |> 
-    tibble::as_tibble()
-  return(v)
+#' 
+hv_read_json <- function(file) {
+  
+  if(!file.exists(file)) stop(paste0("File ", file, " does not exist"))
+  
+  d <- 
+    jsonlite::read_json(file, simplifyVector = TRUE)$values |> 
+    tibble::as_tibble() |> 
+    janitor::clean_names()
+  
+  return(d)
+  
 }
 
-
-#' Read a single hafvog zipfile 
+#' Read any hafvog zipfile
+#'
+#' The files to read from within the zipfile are all jsonfiles
+#'
+#' @param zipfile The pathname of the zip file
+#'
+#' @return A list of tibbles
 #' 
-#'
-#' @param zipfile The name, including path of the hafvog zipfile
-#'
-#' @return a list containing individual tables
 #' @export
 #'
 hv_read_zipfile <- function(zipfile) {
   
-  tmpdir <- tempdir()
-  if(file.exists(paste0(tmpdir, "/hafvog.leidangrar.txt"))) file.remove(paste0(tmpdir, "/hafvog.leidangrar.txt"))
-  if(file.exists(paste0(tmpdir, "/hafvog.skraning.txt"))) file.remove(paste0(tmpdir, "/hafvog.skraning.txt"))
-  if(file.exists(paste0(tmpdir, "/hafvog.stodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.stodvar.txt"))
-  if(file.exists(paste0(tmpdir, "/hafvog.togstodvar.txt"))) file.remove(paste0(tmpdir, "/hafvog.togstodvar.txt"))
-  if(file.exists(paste0(tmpdir, "/hafvog.umhverfi.txt"))) file.remove(paste0(tmpdir, "/hafvog.umhverfi.txt"))
+  if(!file.exists(zipfile)) stop(paste0("File ", zipfile, " does not exist"))
   
-  files <- utils::unzip(zipfile = zipfile, list = TRUE) |> dplyr::pull(Name)
-  utils::unzip(zipfile, exdir = tempdir(), overwrite = TRUE)
-  res <- purrr::map(paste0(tempdir(), "/", files), hv_tbl)
-  names(res) <- files |> stringr::str_remove("hafvog.") |> stringr::str_remove(".txt")
+  # files to read from the tmpdir (in case there are more)
+  files <- unzip(zipfile, list = TRUE) |> dplyr::pull(Name)
   
-  # typesetting
-  res$stodvar <-
-    res$stodvar |> 
-    # mutate only if column exist
-    hv_ch2date(dags) |>  
-    # Note: check how to deal with the negative
-    hv_geoconvert(kastad_v_lengd) |> 
-    hv_geoconvert(hift_v_lengd) |> 
-    hv_geoconvert(kastad_n_breidd) |> 
-    hv_geoconvert(hift_n_breidd)
-
-  res$togstodvar <-
-    res$togstodvar |> 
-    # mutate only if column exist
-    hv_ch2time(togbyrjun) |> 
-    hv_ch2time(togendir)
-
-  return(res)
+  conz <- utils::unzip(zipfile, exdir = tempdir(), overwrite = TRUE)
+  tables <- purrr::map(conz, hv_read_json)
+  
+  names(tables) <- 
+    files |> 
+    basename() |> 
+    stringr::str_remove("hafvog.") |> 
+    stringr::str_remove(".txt")
+  
+  return(tables)
   
 }
 
-#' Reads hafvog's zipfiles
+
+#' Reads hafvog's 'stillingar'
+#'
+#'
+#' @param zipfile The pathname of the zip file
+#'
+#' @return A list of tibbles
+#' @export
+#'
+hv_read_stillingar <- function(zipfile) {
+  hv_read_zipfile(zipfile)
+}
+
+#' Reads hafvog's 'stodtoflur'
+#'
+#' @param zipfile The pathname of the zip file
+#'
+#' @return A list of tibbles
+#' @export
+#'
+hv_read_stodtoflur <- function(zipfile) {
+  hv_read_zipfile(zipfile)
+}
+
+#' Reads hafvog's cruise data
 #'
 #' Can read in multiple files. Name of source file is stored in variable ".id"
 #'
 #' @param zipfiles File names, including path
-#' @param collapse_station boolean (default TRUE), returns station, towstation and environment as a single table
+#' @param collapse_station boolean (default TRUE), returns station, towstation  environment as a single table
 #'
 #' @return a list
 #' @export
 #'
-hv_read_zips <- function(zipfiles, collapse_station = TRUE) {
+hv_read_cruise <- function(zipfiles, collapse_station = TRUE) {
   
   res <- purrr::map(zipfiles, hv_read_zipfile)
   names(res) <- basename(zipfiles)
@@ -161,6 +175,7 @@ hv_order_togstodvar <- function(d) {
                   dplyr::everything())
   return(d)
 }
+
 hv_order_umhverfi <- function(d) {
   
   tbl_colnames <- c(".file",
@@ -176,6 +191,7 @@ hv_order_umhverfi <- function(d) {
                   dplyr::everything())
   return(d)
 }
+
 hv_order_skraning <- function(d) {
   
   tbl_colnames <- c(".file",
