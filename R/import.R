@@ -80,7 +80,7 @@ hv_read_stodtoflur <- function(zipfile) {
 #'
 #' @return a list
 #' @export
-#'
+
 hv_read_cruise <- function(zipfiles, collapse_station = TRUE) {
   
   res <- purrr::map(zipfiles, hv_read_zipfile)
@@ -93,6 +93,23 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE) {
          umhverfi = purrr::map(res, "umhverfi") |> dplyr::bind_rows(.id = ".file"),
          skraning = purrr::map(res, "skraning") |> dplyr::bind_rows(.id = ".file"),
          drasl_skraning = purrr::map(res, "drasl_skraning") |> dplyr::bind_rows(.id = ".file"))
+  
+  res$stodvar <-
+    res$stodvar |> 
+    # mutate only if column exist
+    hv_ch2date(dags) |>  
+    # Note: check how to deal with the negative
+    hv_geoconvert(kastad_v_lengd) |> 
+    hv_geoconvert(hift_v_lengd) |> 
+    hv_geoconvert(kastad_n_breidd) |> 
+    hv_geoconvert(hift_n_breidd)
+  
+  res$togstodvar <-
+    res$togstodvar |> 
+    # mutate only if column exist
+    hv_ch2time(togbyrjun) |> 
+    hv_ch2time(togendir)
+  
   
   res$stodvar <-    hv_order_stodvar(res$stodvar)
   res$togstodvar <- hv_order_togstodvar(res$togstodvar)
