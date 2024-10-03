@@ -1,5 +1,12 @@
-tbl_js <- function(zpth, tbl) {
-  conz <- unzip(zpth, tbl, exdir = tempdir())
+#' Read in a single json file from a zip-file
+#'
+#' @param zipfile The path and the name of the zip file
+#' @param file The json file to read
+#'
+#' @return a tibble
+#' 
+tbl_json <- function(zipfile, file) {
+  conz <- unzip(zipfile = zipfile, file = file, exdir = tempdir())
   d <-
     jsonlite::read_json(conz, simplifyVector = TRUE)$values |> 
     janitor::clean_names() |> 
@@ -8,118 +15,23 @@ tbl_js <- function(zpth, tbl) {
   return(d)
 }
 
-# # could read all in at once via:
-
 
 #' Title
 #'
 #' The current form is just mimicry
 #'
-#' @param con path to stillingar_SMB_rall
+#' @param zipfile The pathname of the zip file
 #'
 #' @export
 #'
-js_stillingar_all <- function(con = "data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip") {
-  tables <- unzip(con, list = TRUE) |> dplyr::pull(Name)
-  stillingar <- purrr::map2(con, tables, tbl_js)
+hv_read_stillingar <- function(zipfile = "data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip") {
+  tables <- unzip(zipfile, list = TRUE) |> dplyr::pull(Name)
+  stillingar <- purrr::map2(zipfile, tables, tbl_json)
   names(stillingar) <- 
     tables |> 
     stringr::str_remove("hafvog.") |> 
     stringr::str_remove(".txt")
   return(stillingar)
-}
-
-
-
-
-#' Title
-#'
-#' The current form is just mimicry
-#'
-#' @param con path to stillingar_SMB_rall
-#'
-#' @export
-#'
-js_stadla_rallstodvar <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  
-  tbl_js(con, "hafvog.sti_rallstodvar.txt") |>
-    dplyr::left_join(tbl_js(con, "hafvog.sti_leidangrar.txt"), by = "leidangur_id") |>
-    dplyr::mutate(kastad_v = -kastad_v,
-                  hift_v = -hift_v,
-                  index = reitur * 100 + tognumer)
-  
-}
-
-#' Title
-#'
-#' bla, bla
-#'
-#' @param con XX
-#'
-#' @export
-#'
-js_stadla_tegund <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  
-  tbl_js(con, "hafvog.fiskteg_tegundir.txt") |>
-    dplyr::rename(tegund = fisktegund_id)
-  
-}
-
-#' Title
-#'
-#' bla, bla
-#'
-#' @param con XX
-#'
-#' @export
-#'
-js_stadla_lw <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  
-  d <-
-    tbl_js(con, "hafvog.fiskteg_lengd_thyngd.txt") |>
-    dplyr::rename(tegund = fisktegund_id) |>
-    dplyr::mutate(fravik = fravik/100) |>
-    dplyr::collect(n = Inf)
-  x <-
-    d |>
-    dplyr::group_by(tegund) |>
-    dplyr::summarise(l.max = max(lengd))
-  
-  expand.grid(tegund = unique(d$tegund),
-              # This is a bit too much
-              lengd = 1:1500) |>
-    dplyr::as_tibble() |>
-    dplyr::left_join(x, by = "tegund") |>
-    dplyr::filter(lengd <= l.max) |>
-    dplyr::select(-l.max) |>
-    dplyr::left_join(d, by = c("tegund", "lengd")) |>
-    dplyr::arrange(tegund, -lengd) |>
-    dplyr::group_by(tegund) |>
-    tidyr::fill(fravik:slaegt_a) |>
-    dplyr::ungroup() |>
-    dplyr:: mutate(osl = oslaegt_a * lengd^oslaegt_b,
-                   sl = slaegt_a * lengd^slaegt_b) |> 
-    dplyr::arrange(tegund, lengd)
-  
-}
-
-
-js_fisktegundir <- function(con = "data-raw/stodtoflur.zip") {
-  tbl_js(con, "hafvog.species_v.txt")
-}
-
-
-js_maeliatridi <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  tbl_js(con, "hafvog.maeliatridi.txt")
-}
-
-
-js_magaastand <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  tbl_js(con, "hafvog.magaastand.txt")
-}
-
-js_fiskteg.maeliatridi <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
-  tbl_js(con, "hafvog.fiskteg_maeliatridi.txt")
 }
 
 

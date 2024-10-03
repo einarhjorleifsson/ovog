@@ -2,11 +2,8 @@
 
 export(hv_bind_timeperiods)
 export(hv_create_tables)
+export(hv_read_stillingar)
 export(hv_read_zipfile)
 export(hv_read_zips)
 export(hv_std)
 export(hv_tbl)
-export(js_stadla_lw)
-export(js_stadla_rallstodvar)
-export(js_stadla_tegund)
-export(js_stillingar_all)

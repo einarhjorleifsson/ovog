@@ -51,3 +51,8 @@ d |>
   hv_create_tables() |> 
   names()
 ```
+
+```{r}
+hv_read_stillingar("data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip")
+```
+
