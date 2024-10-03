@@ -9,10 +9,28 @@ tbl_js <- function(zpth, tbl) {
 }
 
 # # could read all in at once via:
-# zpth <- "inst/extdata/stillingar_SMB_rall_(botnfiskur).zip"
-# tables <- unzip(zpth, list = TRUE) |> pull(Name)
-# res <- map2(zpth, tables, tbl_js)
-# names(res) <- tables |> str_remove("hafvog.")
+
+
+#' Title
+#'
+#' The current form is just mimicry
+#'
+#' @param con path to stillingar_SMB_rall
+#'
+#' @export
+#'
+js_stillingar_all <- function(con = "data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip") {
+  tables <- unzip(con, list = TRUE) |> dplyr::pull(Name)
+  stillingar <- purrr::map2(con, tables, tbl_js)
+  names(stillingar) <- 
+    tables |> 
+    stringr::str_remove("hafvog.") |> 
+    stringr::str_remove(".txt")
+  return(stillingar)
+}
+
+
+
 
 #' Title
 #'
@@ -68,6 +86,7 @@ js_stadla_lw <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") 
     dplyr::summarise(l.max = max(lengd))
   
   expand.grid(tegund = unique(d$tegund),
+              # This is a bit too much
               lengd = 1:1500) |>
     dplyr::as_tibble() |>
     dplyr::left_join(x, by = "tegund") |>
@@ -76,10 +95,11 @@ js_stadla_lw <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") 
     dplyr::left_join(d, by = c("tegund", "lengd")) |>
     dplyr::arrange(tegund, -lengd) |>
     dplyr::group_by(tegund) |>
-    tidyr::fill(oslaegt_a:fravik) |>
+    tidyr::fill(fravik:slaegt_a) |>
     dplyr::ungroup() |>
     dplyr:: mutate(osl = oslaegt_a * lengd^oslaegt_b,
-                   sl = slaegt_a * lengd^slaegt_b)
+                   sl = slaegt_a * lengd^slaegt_b) |> 
+    dplyr::arrange(tegund, lengd)
   
 }
 
@@ -97,3 +117,9 @@ js_maeliatridi <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip"
 js_magaastand <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
   tbl_js(con, "hafvog.magaastand.txt")
 }
+
+js_fiskteg.maeliatridi <- function(con = "data-raw/stillingar_SMB_rall_(botnfiskur).zip") {
+  tbl_js(con, "hafvog.fiskteg_maeliatridi.txt")
+}
+
+

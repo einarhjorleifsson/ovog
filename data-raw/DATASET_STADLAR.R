@@ -5,10 +5,15 @@ con <- "data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip"
 ## tegundir ----
 ### json ---
 stadlar.tegundir <-
-  ovog:::js_stadla_tegund_smb() |>
-  dplyr::filter(leidangur_id == lid) |>
-  dplyr::arrange(tegund) |>
-  tidyr::gather(variable, value, lifur_low:kynkirtlar_high) |>
+  ovog:::js_stadla_tegund(con) |>
+  select(tegund, leidangur_id, maelibretti, heildarthyngd_i_kg,
+         lengd_low, lengd_high,
+         dplyr::everything()) |> 
+  dplyr::arrange(tegund)
+
+
+stadlar.tegundir |>
+  tidyr::gather(variable, value, -c(tegund, leidangur_id, maelibretti, heildarthyngd_i_kg)) |>
   dplyr::mutate(value = value / 100) |>
   tidyr::spread(variable, value)
 
