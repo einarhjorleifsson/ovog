@@ -14,6 +14,8 @@
 #' @param stillingar A tibble
 #'
 #' @return A tibble
+#' 
+#' @export
 #'
 hv_tidy_range <- function(stillingar) {
   
@@ -63,6 +65,8 @@ hv_tidy_range <- function(stillingar) {
 #'
 #' @return A tibble
 #'
+#' @export
+#' 
 hv_tidy_length_weights <- function(stillingar, adjust_lengths = TRUE) {
   
   # Ugly code, must be a better way

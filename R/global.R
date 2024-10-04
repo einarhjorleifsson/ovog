@@ -29,7 +29,7 @@ utils::globalVariables(
     "s_kynfaeri", "s_tegund_as_faedutegund", "s_radnr", "s_ranfiskurteg", "s_heildarthyngd",
     
     "leidangur_id", "maelibretti", "heildarthyngd_i_kg",
-    
+    "osl", "sl",
     "Name",
     
     "."))
