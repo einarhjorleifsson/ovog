@@ -42,7 +42,8 @@ hv_tidy_range <- function(stillingar) {
   range <-
     low |> 
     dplyr::left_join(hig,
-                     by = dplyr::join_by(tegund, leidangur_id, maelibretti, var))
+                     by = dplyr::join_by(tegund, leidangur_id, maelibretti, var)) |> 
+    tidyr::drop_na()
   
   return(range)
   
