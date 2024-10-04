@@ -129,6 +129,16 @@ hv_tidy_length_weights <- function(stillingar, adjust_lengths = TRUE) {
                        d |> dplyr::filter(var == "slaegt") |> dplyr::distinct() |> tidyr::spread(par, val))
   }
   
+  d <- 
+    d |> 
+    dplyr:: mutate(fravik = fravik / 100,
+                   osl  = oslaegt_a * lengd^oslaegt_b,
+                   sl   = slaegt_a  * lengd^slaegt_b,
+                   osl1 = osl * (1 - fravik),
+                   osl2 = osl * (1 + fravik),
+                   sl1  = sl  * (1 - fravik),
+                   sl2  = sl  * (1 + fravik))
+  
   return(d)
   
 }
