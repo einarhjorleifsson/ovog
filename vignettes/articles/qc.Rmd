@@ -1,0 +1,48 @@
+---
+title: "Quality control"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ovog)
+```
+
+```{r}
+stillingar <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stillingar_SMH_rall_(haust).zip")
+
+range <- ovog:::hv_tidy_range(stillingar)
+lw    <- ovog:::hv_tidy_length_weights(stillingar)
+```
+
+## Not the same max length
+
+* The "range" table gives the maximum length of species
+* The "lw" table contains lengths (more than one for certain species)
+
+Would expect that the maximum length to be the same in both tables for a given species. That is however not the case:
+
+```{r}
+lw |> 
+  dplyr::select(tegund, lengd) |> 
+  dplyr::group_by(tegund) |> 
+  dplyr::filter(lengd == max(lengd)) |> 
+  dplyr::ungroup() |> 
+  dplyr::rename(lengd.lw = lengd) |> 
+  dplyr::left_join(range |> 
+                     dplyr::filter(var == "lengd") |> 
+                     dplyr::select(tegund, lengd.max = max),
+                   by = dplyr::join_by(tegund)) |> 
+  dplyr::mutate(comparison = dplyr::case_when(lengd.lw > lengd.max ~ "lw bigger",
+                                        lengd.lw < lengd.max ~ "lw smaller",
+                                        lengd.lw == lengd.max ~ "same",
+                                        .default = "missing")) |> 
+  dplyr::filter(!comparison %in% c("same", "missing")) |>  
+  knitr::kable(caption = "Comparison of maximum length and length in lw_table")
+```
+

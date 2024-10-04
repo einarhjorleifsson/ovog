@@ -1,6 +1,6 @@
 Package: ovog
 Title: Read the hafvog's json files into R
-Version: 2024.09.27
+Version: 2024.10.01
 Authors@R: c(
     person("Einar", "Hjörleifsson", , "einar.hjorleifsson@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0004-2160-5380")),
@@ -29,5 +29,6 @@ Imports:
     tidyselect,
     utils
 Suggests:
-    mardata
-    
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

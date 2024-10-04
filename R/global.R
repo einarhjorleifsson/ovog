@@ -28,6 +28,8 @@ utils::globalVariables(
     "s_kynthroski", "s_kvarnanr", "s_nr", "s_oslaegt", "s_slaegt", "s_magaastand", "s_lifur",
     "s_kynfaeri", "s_tegund_as_faedutegund", "s_radnr", "s_ranfiskurteg", "s_heildarthyngd",
     
+    "leidangur_id", "maelibretti", "heildarthyngd_i_kg",
+    
     "Name",
     
     "."))

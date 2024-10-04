@@ -29,30 +29,3 @@ You can install the development version of ovog from [GitHub](https://github.com
 remotes::install_github("einarhjorleifsson/ovog")
 ```
 
-## The fundamental stuff
-
-With {ovog} you can read in the content of the hafvog zip files via:
-
-```{r example}
-library(ovog)
-zip_path <- system.file("zips", "A3-2024.zip", package = "ovog")
-tmpfile <- tempfile()
-download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
-zip_path <- c(zip_path, tmpfile)
-d <- hv_read_zips(zip_path, collapse_station = TRUE)
-
-names(d)
-
-d$stodvar |> 
-  dplyr::left_join(d$skraning) |> 
-  dplyr::glimpse()
-
-d |> 
-  hv_create_tables() |> 
-  names()
-```
-
-```{r}
-hv_read_stillingar("data-raw/stillingar/stillingar_SMB_rall_(botnfiskur).zip")
-```
-

@@ -34,7 +34,7 @@ library(tidyverse)
 Importing is done via 'hv_read_hafvog'. One normally would do something like this (replace the name with whatever zip-name you have on your computer):
 
 ```{r, eval = FALSE}
-res <- hv_read_zips(zipfiles = "A7-2024.zip")
+res <- hv_read_cruise(zipfiles = "A7-2024.zip")
 ```
 
 For a demo we will download a zip file from hafro ftp-site: 
@@ -42,7 +42,7 @@ For a demo we will download a zip file from hafro ftp-site:
 ```{r}
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
-res <- hv_read_zips(tmpfile)
+res <- hv_read_cruise(tmpfile)
 names(res)
 ```
 
