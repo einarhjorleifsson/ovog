@@ -4,18 +4,24 @@
 \alias{hv_tidy_range}
 \title{Create a tidy QC species min-max table}
 \usage{
-hv_tidy_range(stillingar)
+hv_tidy_range(stillingar, long = TRUE)
 }
 \arguments{
 \item{stillingar}{A tibble}
+
+\item{long}{Boolean (default TRUE) returns a long table}
 }
 \value{
 A tibble
 }
 \description{
-The resulting tibble contains the min and max value for a particular species and variable
+The resulting tibble contains the min and max lengd for a species and the
+ratio range of values relative to the ungutted species weight.
 }
 \details{
 The datasource is a list that contains object "fiskteg_tegundir". The list
 is normally obtained using hv_read_stillingar.
+}
+\note{
+The variable "maelibretti" is the odd man out
 }

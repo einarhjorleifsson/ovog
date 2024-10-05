@@ -6,18 +6,22 @@
 
 #' Create a tidy QC species min-max table
 #' 
-#' The resulting tibble contains the min and max value for a particular species and variable
+#' The resulting tibble contains the min and max lengd for a species and the 
+#' ratio range of values relative to the ungutted species weight.
 #'
 #' The datasource is a list that contains object "fiskteg_tegundir". The list
 #' is normally obtained using hv_read_stillingar.
 #'
 #' @param stillingar A tibble
+#' @param long Boolean (default TRUE) returns a long table
 #'
 #' @return A tibble
 #' 
+#' @note The variable "maelibretti" is the odd man out
+#' 
 #' @export
 #'
-hv_tidy_range <- function(stillingar) {
+hv_tidy_range <- function(stillingar, long = TRUE) {
   
   tmp <- 
     stillingar$fiskteg_tegundir |> 
@@ -32,21 +36,36 @@ hv_tidy_range <- function(stillingar) {
   low <- 
     tmp |> 
     dplyr::select(tegund:maelibretti, tidyselect::ends_with("_low")) |>  
-    tidyr::gather(var, min, -c(tegund:maelibretti)) |> 
-    dplyr::mutate(var = stringr::str_remove(var, "_low"))
+    tidyr::gather(var, val, -c(tegund:maelibretti)) |> 
+    dplyr::mutate(var = stringr::str_remove(var, "^oslaegt_")) |> 
+    tidyr::separate(var, c("var", "range"), sep = "_") |> 
+    dplyr::mutate(val = dplyr::case_when(var == "lengd" ~ val,
+                                         .default = val / 100))
   
   hig <- 
     tmp |> 
     dplyr::select(tegund:maelibretti, tidyselect::ends_with("_high")) |>  
-    tidyr::gather(var, max, -c(tegund:maelibretti)) |> 
-    dplyr::mutate(var = stringr::str_remove(var, "_high"))
+    tidyr::gather(var, val, -c(tegund:maelibretti)) |> 
+    dplyr::mutate(var = stringr::str_remove(var, "^oslaegt_")) |> 
+    tidyr::separate(var, c("var", "range"), sep = "_") |> 
+    dplyr::mutate(val = dplyr::case_when(var == "lengd" ~ val,
+                                         .default = val / 100))
   
-  range <-
-    low |> 
-    dplyr::left_join(hig,
-                     by = dplyr::join_by(tegund, leidangur_id, maelibretti, var)) |> 
-    tidyr::drop_na()
+  range <- 
+    dplyr::bind_rows(low, hig) |> 
+    dplyr::arrange(tegund, var, dplyr::desc(range))
   
+  if(long) {
+    range <- 
+      range |> 
+      tidyr::spread(range, val)
+  } else {
+    range <- 
+      range |> 
+      tidyr::unite("var", var, range) |> 
+      tidyr::spread(var, val)
+  }
+
   return(range)
   
 }
@@ -118,7 +137,9 @@ hv_tidy_length_weights <- function(stillingar, adjust_lengths = TRUE) {
     dplyr::group_by(tegund) |> 
     tidyr::complete(lengd = tidyr::full_seq(lengd, 1)) |> 
     tidyr::fill(fravik:slaegt_a) |> 
+    dplyr::ungroup() |> 
     dplyr::arrange(tegund, lengd)
+    
   
   # unsure if this is kosher
   if(FALSE) {

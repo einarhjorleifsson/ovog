@@ -30,6 +30,7 @@ utils::globalVariables(
     
     "leidangur_id", "maelibretti", "heildarthyngd_i_kg",
     "osl", "sl",
+    "val",
     "Name",
     
     "."))
