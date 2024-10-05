@@ -4,12 +4,15 @@
 \alias{hv_read_cruise}
 \title{Reads hafvog's cruise data}
 \usage{
-hv_read_cruise(zipfiles, collapse_station = TRUE)
+hv_read_cruise(zipfiles, collapse_station = TRUE, augment_skraning = TRUE)
 }
 \arguments{
 \item{zipfiles}{File names, including path}
 
 \item{collapse_station}{boolean (default TRUE), returns station, towstation  environment as a single table}
+
+\item{augment_skraning}{boolean (default TRUE), add some variables from station to skraning. Only active if
+collapse_station is TRUE.}
 }
 \value{
 a list

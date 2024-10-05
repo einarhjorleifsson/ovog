@@ -1,3 +1,7 @@
+# For testing
+# devtools::load_all()
+# res <- ovog::hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
+
 #' Read and parse a json file
 #'
 #' @param file File name
@@ -77,11 +81,13 @@ hv_read_stodtoflur <- function(zipfile) {
 #'
 #' @param zipfiles File names, including path
 #' @param collapse_station boolean (default TRUE), returns station, towstation  environment as a single table
+#' @param augment_skraning boolean (default TRUE), add some variables from station to skraning. Only active if 
+#' collapse_station is TRUE.
 #'
 #' @return a list
 #' @export
 
-hv_read_cruise <- function(zipfiles, collapse_station = TRUE) {
+hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning = TRUE) {
   
   res <- purrr::map(zipfiles, hv_read_zipfile)
   names(res) <- basename(zipfiles)
@@ -127,8 +133,27 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE) {
            skraning = res$skraning,
            leidangrar = res$leidangrar,
            drasl_skraning = res$drasl_skraning)
+    
+    if(augment_skraning) {
+    # Odd to have this within the collapse station - but so be it
+    res$stodvar <- 
+      res$stodvar |> 
+      dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tognumer) & !is.na(fishing_gear_no) ~ (reitur * 100 + tognumer) * 100 + fishing_gear_no,
+                                             .default = -1)) |> 
+      dplyr::select(.file:leidangur, dags, index, stod, reitur, tognumer, fishing_gear_no, dplyr::everything())
+    res$skraning <- 
+      res$stodvar |> 
+      dplyr::select(.file:stod) |> 
+      dplyr::left_join(res$skraning,
+                       by = dplyr::join_by(.file, synis_id)) |> 
+      # maeliadgerd 30 is tagging - would not normally expect that in SMX
+      #   expect tagging to be in another synaflokkur than survey
+      dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
+                                         maeliadgerd %in% 10 ~ "talid",
+                                         .default = "annad"))
+    }
   }
-  
+    
   return(res)
   
 }
