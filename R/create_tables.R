@@ -1,7 +1,7 @@
 # For testing
 # devtools::load_all()
 # res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
-# hv_create_table_kvarnir(res$skraning)
+# hv_create_tables(res)
 
 
 
@@ -142,8 +142,8 @@ hv_create_tables <- function(list, scale = TRUE) {
          numer = numer,
          lengdir = lengdir,
          kvarnir = kvarnir,
-         pred = pred,
-         prey = prey,
+         #pred = pred,
+         #prey = prey,
          pp = pp)
   
   return(res)
