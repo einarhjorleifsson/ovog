@@ -33,6 +33,8 @@ utils::globalVariables(
     "val",
     "Name",
     
+    "magaastand", "prey_nr", "prey_nr", "pred_nr", "prey",
+    
     "."))
 
 

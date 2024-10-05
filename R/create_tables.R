@@ -1,3 +1,114 @@
+# For testing
+# devtools::load_all()
+# res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
+# hv_create_table_kvarnir(res$skraning)
+
+
+
+hv_create_table_kvarnir <- function(skraning) {
+  
+  message("Einar: Should potentially add stomach weight")
+  kvarnir <-
+    skraning |> 
+    dplyr::filter(maeliadgerd == 3) |> 
+    dplyr::select(.file:stod,
+                  tegund, nr, lengd, kyn,
+                  kynthroski, oslaegt, slaegt,
+                  lifur, kynfaeri,
+                  magaastand)
+  
+  return(kvarnir)
+}
+
+hv_create_table_numer <- function(skraning) {
+  
+  numer  <- 
+    skraning |> 
+    dplyr::group_by(.file, synis_id, leidangur, dags, index, stod, tegund, m) |> 
+    dplyr::summarise(n = sum(fjoldi),
+                     .groups = "drop") |> 
+    tidyr::pivot_wider(names_from = m, values_from = n, values_fill = 0) |> 
+    dplyr::mutate(alls = maelt + talid) |> 
+    dplyr::rename(fj_maelt = maelt,
+                  fj_talid = talid,
+                  fj_alls = alls) |> 
+    dplyr::mutate(r = dplyr::case_when(fj_maelt == 0 ~ 1,
+                                       .default = fj_alls / fj_maelt))
+  
+  return(numer)
+}
+
+hv_create_table_lengdir <- function(skraning, scale_by_counted = TRUE) {
+  
+  if(scale_by_counted) {
+    numer <- hv_create_table_numer(skraning)
+  }
+  
+  lengdir <- 
+    skraning |> 
+    dplyr::filter(m %in% "maelt") |> 
+    dplyr::group_by(.file, synis_id, leidangur, dags, index, stod, tegund, lengd) |> 
+    dplyr::reframe(n = sum(fjoldi, na.rm = TRUE))
+  
+  if(scale_by_counted) {
+    lengdir <- 
+      lengdir |> 
+      dplyr::left_join(numer |> 
+                         dplyr::select(.file, synis_id, leidangur, dags, index, stod, tegund, r),
+                       by = dplyr::join_by(.file, synis_id, leidangur, dags, index, stod, tegund)) |> 
+      dplyr::mutate(n = r * n)
+  }
+  
+  lengdir <- 
+    lengdir |> 
+    dplyr::mutate(b = (n * 0.01 * lengd^3) / 1e3)  # biomass in kg
+  
+  return(lengdir)
+}
+
+
+
+hv_create_table_prey <- function(skraning) {
+  
+  ## Predators -----------------------------------------------------------------
+  pred <- 
+    skraning |> 
+    dplyr::filter(!is.na(magaastand)) |> 
+    dplyr::select(.file:stod,
+                  pred = tegund, 
+                  pred_nr = nr, 
+                  pred_lengd = lengd,
+                  oslaegt,
+                  slaegt,
+                  astand = magaastand)
+  
+  ## Prey ----------------------------------------------------------------------
+  prey <-
+    skraning |> 
+    dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
+    dplyr::rename(prey_nr = nr) |> 
+    dplyr::select(.file:stod,
+                  pred = ranfiskurteg,      # will join by this
+                  pred_nr = kvarnanr,       # will join by this
+                  prey = tegund,
+                  prey_nr,
+                  n = fjoldi,
+                  prey_lengd = lengd,
+                  kyn,
+                  heildarthyngd) 
+
+  
+  pp <- 
+    pred |> 
+    dplyr::left_join(prey,
+                     by = dplyr::join_by(.file, synis_id, leidangur, dags, index, stod, pred, pred_nr)) |> 
+    dplyr::mutate(heildarthyngd = tidyr::replace_na(heildarthyngd, 0))
+  
+  return(pp)
+
+}
+
+
 #' Create tables from hafvog "skraning"
 #' 
 #' Normally the input to this function is what is read in from hv_read_hafvog.
@@ -11,108 +122,29 @@
 #' @export
 #' 
 hv_create_tables <- function(list, scale = TRUE) {
-  
-  
+ 
   ## station -------------------------------------------------------------------
-  ST <- 
-    list$stodvar |> 
-    # temporary fix
-    dplyr::mutate(fishing_gear_no = ifelse(is.na(fishing_gear_no), 73, fishing_gear_no)) |> 
-    dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tognumer) & !is.na(fishing_gear_no) ~ (reitur * 100 + tognumer) * 100 + fishing_gear_no,
-                                           .default = -1),
-                  ar = lubridate::year(dags))
-  ## Measures ------------------------------------------------------------------
-  M <- 
-    list$skraning |> 
-    # maeliadgerd 30 is tagging - would not normally expect that in SMX
-    #   expect tagging to be in another synaflokkur than survey
-    dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
-                                       maeliadgerd %in% 10 ~ "talid",
-                                       .default = "annad")) |> 
-    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = dplyr::join_by(synis_id, .file))
-  ## Numer -----------------------------------------------------------------------
-  NU <- 
-    M |> 
-    dplyr::group_by(.file, synis_id, tegund, m) |> 
-    dplyr::summarise(n = sum(fjoldi),
-                     .groups = "drop") |> 
-    tidyr::pivot_wider(names_from = m, values_from = n, values_fill = 0) |> 
-    dplyr::mutate(alls = maelt + talid) |> 
-    dplyr::rename(fj_maelt = maelt,
-                  fj_talid = talid,
-                  fj_alls = alls) |> 
-    dplyr::mutate(r = dplyr::case_when(fj_maelt == 0 ~ 1,
-                                       .default = fj_alls / fj_maelt)) |> 
-    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = dplyr::join_by(synis_id, .file)) |> 
-    dplyr::select(synis_id, ar, index, tegund, fj_maelt, fj_talid, fj_alls, r, .file)
   
+  ## Numer ---------------------------------------------------------------------
+  numer <- hv_create_table_numer(list$skraning)
   
-  ## Length ----------------------------------------------------------------------
-  LE <-
-    M |> 
-    dplyr::filter(m %in% "maelt") |> 
-    dplyr::group_by(.file, synis_id, tegund, lengd) |> 
-    dplyr::reframe(n = sum(fjoldi, na.rm = TRUE)) |> 
-    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = dplyr::join_by(synis_id, .file))
-  if(scale) {
-    LE <- 
-      LE |> 
-      dplyr::left_join(NU |> 
-                       dplyr::select(.file, synis_id, tegund, r),
-                     by = dplyr::join_by(.file, synis_id, tegund)) |> 
-    dplyr::mutate(n = r * n,
-                  b = (n * 0.01 * lengd^3) / 1e3)  # biomass in kg
-  }
+  ## Length --------------------------------------------------------------------
+  lengdir <- hv_create_table_lengdir(list$skraning)
   
-  LE <- 
-    LE |> 
-    dplyr::select(.file, synis_id, ar, index, tegund, lengd, n, b)
+  ## Kvarnir -------------------------------------------------------------------
+  kvarnir <- hv_create_table_kvarnir(list$skraning)
   
-  ## Kvarnir ---------------------------------------------------------------------
-  KV <- 
-    M |> 
-    dplyr::filter(maeliadgerd == 3) |> 
-    dplyr::select(.file, synis_id, tegund, nr, lengd, kyn,
-                  kynthroski, oslaegt, 
-                  lifur, dplyr::everything()) |> 
-    dplyr::select(-c(ar, index)) |> 
-    dplyr::left_join(ST |> dplyr::select(synis_id, ar, index, .file),
-                     by = dplyr::join_by(synis_id, .file)) |> 
-    dplyr::select(synis_id, ar, index, tegund, nr, lengd, dplyr::everything())
+  ## Predator-prey -------------------------------------------------------------
+  pp <- hv_create_table_prey(list$skraning)
   
-  ## Predators (not really needed) ---------------------------------------------
-  pred <- 
-    M |> 
-    dplyr::filter(!is.na(magaastand)) |> 
-    dplyr::select(.file, synis_id, pred = tegund, nr, oslaegt, # slaegt, 
-                  astand = magaastand, dplyr::everything()) 
-  # # Need the support table upstream
-  # dplyr::left_join(magaastand |> 
-  #                    dplyr::select(astand, lysing_astands),
-  #                  by = "astand") |> 
-  # dplyr::select(-astand) |> 
-  # dplyr::rename(astand = lysing_astands)
-  ## Prey (not really needed) --------------------------------------------------
-  prey <-
-    M |> 
-    dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
-    dplyr::rename(prey = tegund,
-                  pred = ranfiskurteg,
-                  pnr = nr, 
-                  nr = kvarnanr) |>
-    dplyr::select(.file, synis_id, pred, nr, prey, pnr, 
-                  n = fjoldi, lengd, kyn, thyngd = heildarthyngd)
+  res <- 
+    list(stodvar = list$stodvar,
+         numer = numer,
+         lengdir = lengdir,
+         kvarnir = kvarnir,
+         pred = pred,
+         prey = prey,
+         pp = pp)
   
-  pp <- 
-    pred |> 
-    dplyr::left_join(prey, by = c("synis_id", "pred", "nr"))  |> 
-    dplyr::left_join(ST |>
-                       dplyr::select(synis_id, leidangur, stod),
-                     by = "synis_id") |>
-    dplyr::select(leidangur, stod, pred:thyngd)
-  
-  return(list(ST = ST, M = M, NU = NU, LE = LE, KV = KV, pred = pred, prey = prey, pp = pp))
+  return(res)
 }

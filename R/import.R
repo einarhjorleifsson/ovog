@@ -1,7 +1,8 @@
 # For testing
 # devtools::load_all()
-# res <- ovog::hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
-
+# res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
+# stodtoflur <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stodtoflur.zip")
+# stillingar <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stillingar_SMH_rall_(haust).zip")
 #' Read and parse a json file
 #'
 #' @param file File name
