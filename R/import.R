@@ -1,9 +1,11 @@
 # For testing
 # devtools::load_all()
-# res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
-# stodtoflur <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stodtoflur.zip")
-# stillingar <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stillingar_SMH_rall_(haust).zip")
-# res <- hv_create_tables(res)
+# zipfiles <- c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip")
+# res <-  hv_import_cruise(zipfiles)
+# stodtoflur <- hv_import_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stodtoflur.zip")
+# stillingar <- hv_import_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stillingar_SMH_rall_(haust).zip")
+
+
 #' Read and parse a json file
 #'
 #' @param file File name
@@ -33,7 +35,7 @@ hv_read_json <- function(file) {
 #' 
 #' @export
 #'
-hv_read_zipfile <- function(zipfile) {
+hv_import_zipfile <- function(zipfile) {
   
   if(!file.exists(zipfile)) stop(paste0("File ", zipfile, " does not exist"))
   
@@ -62,8 +64,8 @@ hv_read_zipfile <- function(zipfile) {
 #' @return A list of tibbles
 #' @export
 #'
-hv_read_stillingar <- function(zipfile) {
-  hv_read_zipfile(zipfile)
+hv_import_stillingar <- function(zipfile) {
+  hv_import_zipfile(zipfile)
 }
 
 #' Reads hafvog's 'stodtoflur'
@@ -73,8 +75,8 @@ hv_read_stillingar <- function(zipfile) {
 #' @return A list of tibbles
 #' @export
 #'
-hv_read_stodtoflur <- function(zipfile) {
-  hv_read_zipfile(zipfile)
+hv_import_stodtoflur <- function(zipfile) {
+  hv_import_zipfile(zipfile)
 }
 
 #' Reads hafvog's cruise data
@@ -83,15 +85,13 @@ hv_read_stodtoflur <- function(zipfile) {
 #'
 #' @param zipfiles File names, including path
 #' @param collapse_station boolean (default TRUE), returns station, towstation  environment as a single table
-#' @param augment_skraning boolean (default TRUE), add some variables from station to skraning. Only active if 
-#' collapse_station is TRUE.
 #'
 #' @return a list
 #' @export
 
-hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning = TRUE) {
+hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
   
-  res <- purrr::map(zipfiles, hv_read_zipfile)
+  res <- purrr::map(zipfiles, hv_import_zipfile)
   names(res) <- basename(zipfiles)
   # safest would be to check if list names exists
   res <- 
@@ -101,6 +101,7 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning =
          umhverfi = purrr::map(res, "umhverfi") |> dplyr::bind_rows(.id = ".file"),
          skraning = purrr::map(res, "skraning") |> dplyr::bind_rows(.id = ".file"),
          drasl_skraning = purrr::map(res, "drasl_skraning") |> dplyr::bind_rows(.id = ".file"))
+  
   
   res$stodvar <-
     res$stodvar |> 
@@ -135,40 +136,11 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning =
            skraning = res$skraning,
            leidangrar = res$leidangrar,
            drasl_skraning = res$drasl_skraning)
-    
-    if(augment_skraning) {
-    # Odd to have this within the collapse station - but so be it
-    res$stodvar <- 
-      res$stodvar |> 
-      dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tognumer) & !is.na(fishing_gear_no) ~ (reitur * 100 + tognumer) * 100 + fishing_gear_no,
-                                             .default = -1)) |> 
-      dplyr::mutate(lon1 = -kastad_v_lengd,
-                    lat1 =  kastad_n_breidd,
-                    lon2 = -hift_v_lengd,
-                    lat2 =  hift_n_breidd,
-                    lon = dplyr::case_when(is.na(lon2) ~ lon1,
-                                           !is.na(lon1) & !is.na(lon2) ~ (lon1 + lon2) / 2,
-                                           .default = lon1),
-                    lat = dplyr::case_when(is.na(lat2) ~ lat1,
-                                           !is.na(lat1) & !is.na(lat2) ~ (lat1 + lat2) / 2,
-                                           .default = lat1))  |> 
-      dplyr::select(.file:leidangur, dags, index, lon, lat, toglengd, stod, reitur, tognumer, fishing_gear_no, dplyr::everything())
-    res$skraning <- 
-      res$stodvar |> 
-      dplyr::select(.file:stod) |> 
-      dplyr::left_join(res$skraning,
-                       by = dplyr::join_by(.file, synis_id)) |> 
-      # maeliadgerd 30 is tagging - would not normally expect that in SMX
-      #   expect tagging to be in another synaflokkur than survey
-      dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
-                                         maeliadgerd %in% 10 ~ "talid",
-                                         .default = "annad"))
-    }
   }
-    
-  return(res)
   
+  return(res)
 }
+
 
 hv_order_stodvar <- function(d) {
   
