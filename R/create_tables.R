@@ -1,9 +1,26 @@
 # For testing
 # devtools::load_all()
 # res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
-# hv_create_tables(res)
+# res <- hv_create_tables(res)
 
-
+hv_create_table_stodvar <- function(stodvar) {
+  
+  stodvar <- 
+    stodvar |> 
+    dplyr::mutate(lon1 = -kastad_v_lengd,
+                  lat1 =  kastad_n_breidd,
+                  lon2 = -hift_v_lengd,
+                  lat2 =  hift_n_breidd,
+                  lon = dplyr::case_when(is.na(lon2) ~ lon1,
+                                         !is.na(lon1) & !is.na(lon2) ~ (lon1 + lon2) / 2,
+                                         .default = lon1),
+                  lat = dplyr::case_when(is.na(lat2) ~ lat1,
+                                         !is.na(lat1) & !is.na(lat2) ~ (lat1 + lat2) / 2,
+                                         .default = lat1))
+  
+  return(stodvar)
+  
+}
 
 hv_create_table_kvarnir <- function(skraning) {
   
@@ -24,9 +41,8 @@ hv_create_table_numer <- function(skraning) {
   
   numer  <- 
     skraning |> 
-    dplyr::group_by(.file, synis_id, leidangur, dags, index, stod, tegund, m) |> 
-    dplyr::summarise(n = sum(fjoldi),
-                     .groups = "drop") |> 
+    dplyr::group_by(.file, synis_id, leidangur, dags, index, lon, lat, toglengd, stod, tegund, m) |> 
+    dplyr::reframe(n = sum(fjoldi)) |> 
     tidyr::pivot_wider(names_from = m, values_from = n, values_fill = 0) |> 
     dplyr::mutate(alls = maelt + talid) |> 
     dplyr::rename(fj_maelt = maelt,
@@ -47,15 +63,15 @@ hv_create_table_lengdir <- function(skraning, scale_by_counted = TRUE) {
   lengdir <- 
     skraning |> 
     dplyr::filter(m %in% "maelt") |> 
-    dplyr::group_by(.file, synis_id, leidangur, dags, index, stod, tegund, lengd) |> 
+    dplyr::group_by(.file, synis_id, leidangur, dags, index, lon, lat, toglengd, stod, tegund, lengd) |> 
     dplyr::reframe(n = sum(fjoldi, na.rm = TRUE))
   
   if(scale_by_counted) {
     lengdir <- 
       lengdir |> 
       dplyr::left_join(numer |> 
-                         dplyr::select(.file, synis_id, leidangur, dags, index, stod, tegund, r),
-                       by = dplyr::join_by(.file, synis_id, leidangur, dags, index, stod, tegund)) |> 
+                         dplyr::select(.file, synis_id, leidangur, dags, index, lon, lat, toglengd, stod, tegund, r),
+                       by = dplyr::join_by(.file, synis_id, leidangur, dags, index, lon, lat, toglengd, stod, tegund)) |> 
       dplyr::mutate(n = r * n)
   }
   
@@ -96,16 +112,16 @@ hv_create_table_prey <- function(skraning) {
                   prey_lengd = lengd,
                   kyn,
                   heildarthyngd) 
-
+  
   
   pp <- 
     pred |> 
     dplyr::left_join(prey,
-                     by = dplyr::join_by(.file, synis_id, leidangur, dags, index, stod, pred, pred_nr)) |> 
+                     by = dplyr::join_by(.file, synis_id, leidangur, dags, index, lon, lat, toglengd, stod, pred, pred_nr)) |> 
     dplyr::mutate(heildarthyngd = tidyr::replace_na(heildarthyngd, 0))
   
   return(pp)
-
+  
 }
 
 
@@ -122,8 +138,9 @@ hv_create_table_prey <- function(skraning) {
 #' @export
 #' 
 hv_create_tables <- function(list, scale = TRUE) {
- 
+  
   ## station -------------------------------------------------------------------
+  station <- hv_create_table_stodvar(list$stodvar)
   
   ## Numer ---------------------------------------------------------------------
   numer <- hv_create_table_numer(list$skraning)

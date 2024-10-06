@@ -3,6 +3,7 @@
 # res <-  hv_read_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
 # stodtoflur <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stodtoflur.zip")
 # stillingar <- hv_read_stillingar("~/R/Pakkar2/osmx/data-raw/SMH/stillingar_SMH_rall_(haust).zip")
+# res <- hv_create_tables(res)
 #' Read and parse a json file
 #'
 #' @param file File name
@@ -105,7 +106,7 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning =
     res$stodvar |> 
     # mutate only if column exist
     hv_ch2date(dags) |>  
-    # Note: check how to deal with the negative
+    # Note: check how to deal with the negative (now done downstream)
     hv_geoconvert(kastad_v_lengd) |> 
     hv_geoconvert(hift_v_lengd) |> 
     hv_geoconvert(kastad_n_breidd) |> 
@@ -141,7 +142,17 @@ hv_read_cruise <- function(zipfiles, collapse_station = TRUE, augment_skraning =
       res$stodvar |> 
       dplyr::mutate(index = dplyr::case_when(!is.na(reitur) & !is.na(tognumer) & !is.na(fishing_gear_no) ~ (reitur * 100 + tognumer) * 100 + fishing_gear_no,
                                              .default = -1)) |> 
-      dplyr::select(.file:leidangur, dags, index, stod, reitur, tognumer, fishing_gear_no, dplyr::everything())
+      dplyr::mutate(lon1 = -kastad_v_lengd,
+                    lat1 =  kastad_n_breidd,
+                    lon2 = -hift_v_lengd,
+                    lat2 =  hift_n_breidd,
+                    lon = dplyr::case_when(is.na(lon2) ~ lon1,
+                                           !is.na(lon1) & !is.na(lon2) ~ (lon1 + lon2) / 2,
+                                           .default = lon1),
+                    lat = dplyr::case_when(is.na(lat2) ~ lat1,
+                                           !is.na(lat1) & !is.na(lat2) ~ (lat1 + lat2) / 2,
+                                           .default = lat1))  |> 
+      dplyr::select(.file:leidangur, dags, index, lon, lat, toglengd, stod, reitur, tognumer, fishing_gear_no, dplyr::everything())
     res$skraning <- 
       res$stodvar |> 
       dplyr::select(.file:stod) |> 
