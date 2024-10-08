@@ -93,7 +93,6 @@ hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
   
   res <- purrr::map(zipfiles, hv_import_zipfile)
   names(res) <- basename(zipfiles)
-  # safest would be to check if list names exists
   res <- 
     list(leidangrar = purrr::map(res, "leidangrar") |> dplyr::bind_rows(.id = ".file"),
          stodvar = purrr::map(res, "stodvar") |> dplyr::bind_rows(.id = ".file"),
@@ -101,7 +100,6 @@ hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
          umhverfi = purrr::map(res, "umhverfi") |> dplyr::bind_rows(.id = ".file"),
          skraning = purrr::map(res, "skraning") |> dplyr::bind_rows(.id = ".file"),
          drasl_skraning = purrr::map(res, "drasl_skraning") |> dplyr::bind_rows(.id = ".file"))
-  
   
   res$stodvar <-
     res$stodvar |> 
@@ -125,14 +123,29 @@ hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
   res$umhverfi <-   hv_order_umhverfi(res$umhverfi)
   res$skraning <-   hv_order_skraning(res$skraning)
   
+  # use leidangur-synis_id as the unique key, drop .file
+  lh <- function(l) {
+    l |> 
+      dplyr::left_join(res$stodvar |>  dplyr::select(.file, synis_id, leidangur),
+                       by = dplyr::join_by(.file, synis_id)) |> 
+      dplyr::select(-.file) |> 
+      dplyr::select(leidangur, synis_id, dplyr::everything())
+  }
+  res$togstodvar <- res$togstodvar |> lh()
+  res$umhverfi <- res$umhverfi |> lh()
+  res$skraning <- res$skraning |> lh()
+  res$drasl_skraning <- res$drasl_skraning |> lh()
+  res$stodvar <- res$stodvar |> dplyr::select(-.file)
+  res$leidangrar <- res$leidangrar |> dplyr::select(-.file)
+  
   if(collapse_station) {
     res <-
       list(stodvar = 
              res$stodvar |> 
              dplyr::left_join(res$togstodvar,
-                              by = dplyr::join_by(.file, synis_id)) |> 
+                              by = dplyr::join_by(leidangur, synis_id)) |> 
              dplyr::left_join(res$umhverfi,
-                              by = dplyr::join_by(.file, synis_id)),
+                              by = dplyr::join_by(leidangur, synis_id)),
            skraning = res$skraning,
            leidangrar = res$leidangrar,
            drasl_skraning = res$drasl_skraning)

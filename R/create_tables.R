@@ -18,7 +18,7 @@ hv_create_table_kvarnir <- function(skraning) {
   kvarnir <-
     skraning |> 
     dplyr::filter(maeliadgerd == 3) |> 
-    dplyr::select(.file, synis_id,
+    dplyr::select(leidangur, synis_id,
                   tegund, nr, lengd, kyn,
                   kynthroski, oslaegt, slaegt,
                   lifur, kynfaeri,
@@ -35,7 +35,7 @@ hv_create_table_numer <- function(skraning) {
     dplyr::mutate(m = dplyr::case_when(maeliadgerd %in% c(1:3, 9, 30) ~ "maelt",
                                        maeliadgerd %in% 10 ~ "talid",
                                        .default = "annad")) |> 
-    dplyr::group_by(.file, synis_id, tegund, m) |> 
+    dplyr::group_by(leidangur, synis_id, tegund, m) |> 
     dplyr::reframe(n = sum(fjoldi)) |> 
     tidyr::pivot_wider(names_from = m, values_from = n, values_fill = 0) |> 
     dplyr::mutate(alls = maelt + talid) |> 
@@ -53,7 +53,7 @@ hv_create_table_lengdir <- function(skraning) {
   lengdir <- 
     skraning |> 
     dplyr::filter(maeliadgerd %in% c(1:3, 9, 30)) |> 
-    dplyr::group_by(.file, synis_id, tegund, lengd) |> 
+    dplyr::group_by(leidangur, synis_id, tegund, lengd) |> 
     dplyr::reframe(n = sum(fjoldi, na.rm = TRUE))
   
   return(lengdir)
@@ -67,7 +67,7 @@ hv_create_table_prey <- function(skraning) {
   pred <- 
     skraning |> 
     dplyr::filter(!is.na(magaastand)) |> 
-    dplyr::select(.file, synis_id,
+    dplyr::select(leidangur, synis_id,
                   tegund,
                   nr,
                   lengd = lengd,
@@ -78,7 +78,7 @@ hv_create_table_prey <- function(skraning) {
     skraning |> 
     dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
     dplyr::rename(prey_nr = nr) |> 
-    dplyr::select(.file, synis_id,
+    dplyr::select(leidangur, synis_id,
                   tegund = ranfiskurteg,
                   nr = kvarnanr,              # A bit odd
                   prey_tegund = tegund,
@@ -93,7 +93,7 @@ hv_create_table_prey <- function(skraning) {
   pp <- 
     pred |> 
     dplyr::left_join(prey,
-                     by = dplyr::join_by(.file, synis_id, tegund, nr)) |> 
+                     by = dplyr::join_by(leidangur, synis_id, tegund, nr)) |> 
     dplyr::mutate(prey_heildarthyngd = tidyr::replace_na(prey_heildarthyngd, 0))
   
   return(pp)
