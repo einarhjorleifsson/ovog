@@ -1,7 +1,7 @@
 # For testing
 # devtools::load_all()
 # res <-  hv_import_cruise(c("~/R/Pakkar2/osmx/data-raw/SMH/TB2-2024.zip", "~/R/Pakkar2/osmx/data-raw/SMH/TTH1-2024.zip"))
-# res <- hv_create_tables(res)
+# res2 <- hv_create_tables(res)
 #
 
 hv_create_table_stodvar <- function(stodvar) {
@@ -61,11 +61,11 @@ hv_create_table_lengdir <- function(skraning) {
 
 
 
-hv_create_table_prey <- function(skraning) {
+hv_create_table_prey <- function(res) {
   
   ## Predators -----------------------------------------------------------------
   pred <- 
-    skraning |> 
+    res$skraning |> 
     dplyr::filter(!is.na(magaastand)) |> 
     dplyr::left_join(res$stodvar |> 
                        dplyr::select(leidangur, synis_id, stod),
@@ -82,7 +82,7 @@ hv_create_table_prey <- function(skraning) {
   
   ## Prey ----------------------------------------------------------------------
   prey <-
-    skraning |> 
+    res$skraning |> 
     dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
     dplyr::rename(prey_nr = nr) |> 
     dplyr::select(leidangur, synis_id,
@@ -134,7 +134,7 @@ hv_create_tables <- function(list, scale = TRUE) {
   kvarnir <- hv_create_table_kvarnir(list$skraning)
   
   ## Predator-prey -------------------------------------------------------------
-  pp <- hv_create_table_prey(list$skraning)
+  pp <- hv_create_table_prey(list)
   
   res <- 
     list(stodvar = list$stodvar,
