@@ -167,28 +167,7 @@ hv_order_stodvar <- function(d) {
   
   d <- 
     dplyr::bind_rows(dummy,
-                     d |> 
-                       dplyr::select(.file, 
-                                     synis_id,
-                                     leidangur,
-                                     #  Note, no station id
-                                     skip,
-                                     dags,
-                                     reitur,
-                                     smareitur,
-                                     kastad_v_lengd,
-                                     kastad_n_breidd,
-                                     hift_v_lengd,
-                                     hift_n_breidd,
-                                     dypi_kastad,
-                                     dypi_hift,
-                                     stod,
-                                     tog_aths,
-                                     # sample variables
-                                     synaflokkur,
-                                     fishing_gear_no,
-                                     grandaralengd,
-                                     dplyr::everything()))
+                     d)
   return(d)
 }
 hv_order_togstodvar <- function(d) {
@@ -199,19 +178,7 @@ hv_order_togstodvar <- function(d) {
   dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "ciTTddddddd")
   d <- 
     dplyr::bind_rows(dummy,
-                     d) |>
-    dplyr::select(.file,
-                  synis_id,
-                  togbyrjun,
-                  togendir,
-                  togtimi,
-                  toghradi,
-                  toglengd,
-                  tognumer,
-                  togstefna,
-                  lodrett_opnun,
-                  larett_opnun,
-                  dplyr::everything())
+                     d)
   return(d)
 }
 
@@ -222,12 +189,7 @@ hv_order_umhverfi <- function(d) {
   dummy <- readr::read_csv("\n", col_names = tbl_colnames, col_types = "cidd")
   d <- 
     dplyr::bind_rows(dummy,
-                     d) |> 
-    dplyr::select(.file,
-                  synis_id,
-                  yfirbordshiti,
-                  botnhiti,
-                  dplyr::everything())
+                     d)
   return(d)
 }
 
