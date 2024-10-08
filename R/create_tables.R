@@ -61,6 +61,7 @@ hv_create_table_lengdir <- function(skraning) {
 
 
 
+
 hv_create_table_prey <- function(list) {
   
   ## Predators -----------------------------------------------------------------
