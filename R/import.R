@@ -134,7 +134,7 @@ hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
   res$togstodvar <- res$togstodvar |> lh()
   res$umhverfi <- res$umhverfi |> lh()
   res$skraning <- res$skraning |> lh()
-  res$drasl_skraning <- res$drasl_skraning |> lh()
+  if(nrow(res$drasl_skraning) > 0) res$drasl_skraning <- res$drasl_skraning |> lh()
   res$stodvar <- res$stodvar |> dplyr::select(-.file)
   res$leidangrar <- res$leidangrar |> dplyr::select(-.file)
   
