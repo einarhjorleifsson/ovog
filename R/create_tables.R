@@ -67,10 +67,17 @@ hv_create_table_prey <- function(skraning) {
   pred <- 
     skraning |> 
     dplyr::filter(!is.na(magaastand)) |> 
-    dplyr::select(leidangur, synis_id,
-                  tegund,
-                  nr,
-                  lengd = lengd,
+    dplyr::left_join(res$stodvar |> 
+                       dplyr::select(leidangur, synis_id, stod),
+                     by = dplyr::join_by(leidangur, synis_id)) |> 
+    dplyr::select(leidangur, synis_id, stod,
+                  fiskur = tegund,
+                  fnr = nr,
+                  flengd = lengd,
+                  oslaegt,
+                  #tegund,
+                  #nr,
+                  #lengd = lengd,
                   astand = magaastand)
   
   ## Prey ----------------------------------------------------------------------
@@ -79,22 +86,22 @@ hv_create_table_prey <- function(skraning) {
     dplyr::filter(maeliadgerd %in% c(20, 21, 22)) |> 
     dplyr::rename(prey_nr = nr) |> 
     dplyr::select(leidangur, synis_id,
-                  tegund = ranfiskurteg,
-                  nr = kvarnanr,              # A bit odd
-                  prey_tegund = tegund,
-                  prey_nr,
-                  prey_nn = fjoldi,
-                  prey_lengd = lengd,
-                  prey_thyngd = oslaegt,
-                  prey_kyn = kyn,
-                  prey_heildarthyngd = heildarthyngd) 
+                  fiskur = ranfiskurteg,
+                  fnr = kvarnanr,              # A bit odd
+                  prey = tegund,
+                  pnr = prey_nr,
+                  lengd = lengd,
+                  n = fjoldi,
+                  thyngd = oslaegt,
+                  kyn = kyn,
+                  heildarthyngd)
   
   
   pp <- 
     pred |> 
     dplyr::left_join(prey,
-                     by = dplyr::join_by(leidangur, synis_id, tegund, nr)) |> 
-    dplyr::mutate(prey_heildarthyngd = tidyr::replace_na(prey_heildarthyngd, 0))
+                     by = dplyr::join_by(leidangur, synis_id, fiskur, fnr)) |> 
+    dplyr::mutate(heildarthyngd = tidyr::replace_na(heildarthyngd, 0))
   
   return(pp)
   

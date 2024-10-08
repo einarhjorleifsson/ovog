@@ -35,6 +35,7 @@ utils::globalVariables(
     
     "magaastand", "prey_nr", "prey_nr", "pred_nr", "prey",
     "prey_heildarthyngd",
+    "res", "fiskur", "fnr",
     
     "."))
 
