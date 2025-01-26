@@ -6,3 +6,4 @@ docs
 *.zip
 garbage
 inst/doc
+data-raw

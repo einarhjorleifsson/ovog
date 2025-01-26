@@ -37,6 +37,8 @@ hv_create_table_numer <- function(skraning) {
                                        .default = "annad")) |> 
     dplyr::group_by(leidangur, synis_id, tegund, m) |> 
     dplyr::reframe(n = sum(fjoldi)) |> 
+    tidyr::complete(leidangur, synis_id, tegund, m = c("maelt", "talid")) |> 
+    dplyr::mutate(n = tidyr::replace_na(n, 0)) |> 
     tidyr::pivot_wider(names_from = m, values_from = n, values_fill = 0) |> 
     dplyr::mutate(alls = maelt + talid) |> 
     dplyr::rename(fj_maelt = maelt,
@@ -111,7 +113,7 @@ hv_create_table_prey <- function(list) {
 
 #' Create tables from hafvog "skraning"
 #' 
-#' Normally the input to this function is what is read in from hv_read_hafvog.
+#' Normally the input to this function is what is read in from hv_import.
 #' The outputs are tables like fiskar.lengdir, fiskar.kvarnir, fiskar.numer, ...
 #' 
 #' @param list A list object containing hafvog dataframes
@@ -130,6 +132,16 @@ hv_create_tables <- function(list, scale = TRUE) {
   
   ## Length --------------------------------------------------------------------
   lengdir <- hv_create_table_lengdir(list$skraning)
+  
+  if(scale == TRUE) {
+    lengdir <- 
+      lengdir |> 
+      dplyr::left_join(numer |> dplyr::select(leidangur, synis_id, tegund, r),
+                       by = dplyr::join_by(leidangur, synis_id, tegund)) |> 
+      dplyr::mutate(r = tidyr::replace_na(r, 1),
+                    n = n * r) |> 
+      dplyr::select(-r)
+  }
   
   ## Kvarnir -------------------------------------------------------------------
   kvarnir <- hv_create_table_kvarnir(list$skraning)

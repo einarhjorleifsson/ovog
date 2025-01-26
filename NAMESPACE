@@ -2,6 +2,7 @@
 
 export(hv_bind_timeperiods)
 export(hv_create_tables)
+export(hv_import)
 export(hv_import_cruise)
 export(hv_import_stillingar)
 export(hv_import_stodtoflur)

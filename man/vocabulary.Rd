@@ -3,7 +3,7 @@
 \docType{data}
 \name{vocabulary}
 \alias{vocabulary}
-\title{Variable vocabulary in {fmr}}
+\title{Variable vocabulary in fmr}
 \format{
 \subsection{\code{vocabulary}}{
 
@@ -15,6 +15,6 @@ vocabulary
 }
 \description{
 A vector containing variable names as delivered in the json-files and
-the corresponding names used in {ovog} if argument std is set to TRUE
+the corresponding names used in ovog if argument std is set to TRUE
 }
 \keyword{datasets}

@@ -89,7 +89,7 @@ hv_import_stodtoflur <- function(zipfile) {
 #' @return a list
 #' @export
 
-hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
+hv_import <- function(zipfiles, collapse_station = TRUE) {
   
   res <- purrr::map(zipfiles, hv_import_zipfile)
   names(res) <- basename(zipfiles)
@@ -153,6 +153,21 @@ hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
   
   return(res)
 }
+
+#' Reads hafvog's cruise data
+#'
+#' Can read in multiple files. Name of source file is stored in variable ".id"
+#'
+#' @param zipfiles File names, including path
+#' @param collapse_station boolean (default TRUE), returns station, towstation  environment as a single table
+#'
+#' @return a list
+#' @export
+hv_import_cruise <- function(zipfiles, collapse_station = TRUE) {
+ message("'hv_import_cruise' is going to be depreciated, please use 'hv_import' instead")
+  hv_import(zipfiles = zipfiles, collapse_station = collapse_station)
+}
+
 
 
 hv_order_stodvar <- function(d) {

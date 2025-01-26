@@ -31,10 +31,10 @@ library(tidyverse)
 
 ## Importing
 
-Importing is done via 'hv_read_hafvog'. One normally would do something like this (replace the name with whatever zip-name you have on your computer):
+Importing is done via 'hv_import'. One normally would do something like this (replace the name with whatever zip-name you have on your computer):
 
 ```{r, eval = FALSE}
-res <- hv_read_cruise(zipfiles = "A7-2024.zip")
+res <- hv_import(zipfiles = "A7-2024.zip")
 ```
 
 For a demo we will download a zip file from hafro ftp-site: 
@@ -42,7 +42,7 @@ For a demo we will download a zip file from hafro ftp-site:
 ```{r}
 tmpfile <- tempfile()
 download.file("ftp://ftp.hafro.is/pub/data/A7-2024.zip", destfile = tmpfile)
-res <- hv_read_cruise(tmpfile)
+res <- hv_import(tmpfile)
 names(res)
 ```
 
@@ -70,13 +70,13 @@ res |> names()
 To access e.g. the "numer" table one does:
 
 ```{r}
-res$NU |> glimpse()
+res$numer |> glimpse()
 ```
 
 One could e.g. plot the station location via:
 
 ```{r}
-res$ST |> 
+res$stodvar |> 
   ggplot(aes(-kastad_v_lengd, kastad_n_breidd)) +
   geom_point() +
   coord_quickmap()
@@ -85,7 +85,7 @@ res$ST |>
 Or one could e.g. take a peek at the length distribution by the familiar:
 
 ```{r}
-res$LE |> 
+res$lengdir |> 
   filter(tegund %in% c(209, 243, 136, 241, 164, 61, 11)) |> 
   group_by(tegund, lengd) |> 
   reframe(n = sum(n)) |> 

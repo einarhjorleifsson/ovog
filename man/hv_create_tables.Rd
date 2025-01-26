@@ -16,6 +16,6 @@ with that counted}
 a list
 }
 \description{
-Normally the input to this function is what is read in from hv_read_hafvog.
+Normally the input to this function is what is read in from hv_import.
 The outputs are tables like fiskar.lengdir, fiskar.kvarnir, fiskar.numer, ...
 }
